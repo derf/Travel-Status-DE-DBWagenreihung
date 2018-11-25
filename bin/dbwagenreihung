@@ -6,6 +6,7 @@ use utf8;
 
 our $VERSION = '0.00';
 
+use List::Util qw(min);
 use Travel::Status::DE::IRIS;
 use Travel::Status::DE::DBWagenreihung;
 
@@ -27,16 +28,72 @@ if (@trains != 1) {
 
 my $wr = Travel::Status::DE::DBWagenreihung->new(
 	departure => $trains[0]->sched_departure,
+	developer_mode => 1,
 	train_number => $train_number,
 );
 
-for my $wagon ($wr->wagons) {
-	printf("%s %2s", $wagon->section, $wagon->number || 'X');
-	if ($wagon->class_type == 12) {
-		print(" 1/2");
+for my $section ($wr->sections) {
+	my $section_length = $section->{end_percent} - $section->{start_percent};
+	my $spacing_left = int(($section_length - 2) / 2) - 1;
+	my $spacing_right = int(($section_length - 2) / 2);
+
+	if ($section_length % 2) {
+		$spacing_left++;
 	}
-	elsif ($wagon->class_type) {
-		printf(" %d", $wagon->class_type);
-	}
-	print("\n");
+
+	printf("|%s%s%s|",
+		' ' x $spacing_left,
+		$section->{name},
+		' ' x $spacing_right
+	);
 }
+print "\n";
+
+my @start_percentages = map { $_->{position}{start_percent} } $wr->wagons;
+print ' ' x ((min @start_percentages) - 1);
+print '[';
+
+for my $wagon ($wr->wagons) {
+	my $wagon_length = $wagon->{position}->{end_percent} - $wagon->{position}->{start_percent};
+	my $spacing_left = int($wagon_length / 2) - 2;
+	my $spacing_right = int($wagon_length / 2) - 1;
+
+	if ($wagon_length % 2) {
+		$spacing_left++;
+	}
+
+	my $wagon_desc = $wagon->number || '?';
+
+	if ($wagon->is_locomotive or $wagon->is_powercar) {
+		$wagon_desc = '<->';
+	}
+
+	printf("%s%3s%s", ' ' x $spacing_left, $wagon_desc, ' ' x $spacing_right);
+}
+print "]\n";
+
+print ' ' x (min @start_percentages);
+for my $wagon ($wr->wagons) {
+	my $wagon_length = $wagon->{position}->{end_percent} - $wagon->{position}->{start_percent};
+	my $spacing_left = int($wagon_length / 2) - 2;
+	my $spacing_right = int($wagon_length / 2) - 1;
+
+	if ($wagon_length % 2) {
+		$spacing_left++;
+	}
+
+	my $class = '';
+
+	if ($wagon->class_type == 1) {
+		$class = ' 1 ';
+	}
+	elsif ($wagon->class_type == 2) {
+		$class = ' 2 ';
+	}
+	elsif ($wagon->class_type == 12) {
+		$class = '1/2';
+	}
+
+	printf("%s%3s%s", ' ' x $spacing_left, $class, ' ' x $spacing_right);
+}
+print "\n";

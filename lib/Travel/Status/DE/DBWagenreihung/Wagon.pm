@@ -11,31 +11,46 @@ use Carp qw(cluck);
 our $VERSION = '0.00';
 
 Travel::Status::DE::DBWagenreihung::Wagon->mk_ro_accessors(
-	qw(class_type has_bistro number section)
+	qw(class_type has_bistro is_locomotive is_powercar number section)
 );
 
 sub new {
 	my ( $obj, %opt ) = @_;
-	my $ref = \%opt;
+	my $ref = {};
 
 	$ref->{class_type} = 0;
 	$ref->{has_bistro} = 0;
-	$ref->{number} = $ref->{wagenordnungsnummer};
-	$ref->{section} = $ref->{fahrzeugsektor};
+	$ref->{is_locomotive} = 0;
+	$ref->{is_powercar} = 0;
+	$ref->{number} = $opt{wagenordnungsnummer};
+	$ref->{section} = $opt{fahrzeugsektor};
 
-	if ($ref->{kategorie} =~ m{SPEISEWAGEN}) {
+	if ($opt{kategorie} =~ m{SPEISEWAGEN}) {
 		$ref->{has_bistro} = 1;
 	}
+	elsif ($opt{kategorie} eq 'LOK') {
+		$ref->{is_locomotive} = 1;
+	}
+	elsif ($opt{kategorie} eq 'TRIEBKOPF') {
+		$ref->{is_powercar} = 1;
+	}
 
-	if ($ref->{fahrzeugtyp} =~ m{^AB}) {
+	if ($opt{fahrzeugtyp} =~ m{AB}) {
 		$ref->{class_type} = 12;
 	}
-	elsif ($ref->{fahrzeugtyp} =~ m{^A}) {
+	elsif ($opt{fahrzeugtyp} =~ m{A}) {
 		$ref->{class_type} = 1;
 	}
-	elsif ($ref->{fahrzeugtyp} =~ m{^B|^WR}) {
+	elsif ($opt{fahrzeugtyp} =~ m{B|WR}) {
 		$ref->{class_type} = 2;
 	}
+
+	my $pos = $opt{positionamhalt};
+
+	$ref->{position}{start_percent} = $pos->{startprozent};
+	$ref->{position}{end_percent} = $pos->{endeprozent};
+	$ref->{position}{start_meters} = $pos->{startmeter};
+	$ref->{position}{end_meters} = $pos->{endemeter};
 
 	return bless( $ref, $obj );
 }

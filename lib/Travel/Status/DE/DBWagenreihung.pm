@@ -67,9 +67,6 @@ sub get_wagonorder {
 		return;
 	}
 	my $json = $self->{json}->decode($content);
-	if ($self->{developer_mode}) {
-		say $self->{json}->pretty->encode($json);
-	}
 
 	if (exists $json->{error}) {
 		$self->{errstr} = 'Backend error: ' . $json->{error}{msg};
@@ -86,6 +83,27 @@ sub error {
 	return $self->{errstr};
 }
 
+sub sections {
+	my ($self) = @_;
+
+	if (exists $self->{sections}) {
+		return @{$self->{sections}};
+	}
+
+	for my $section (@{$self->{data}{istformation}{halt}{allSektor}}) {
+		my $pos = $section->{positionamgleis};
+		push(@{$self->{sections}}, {
+			name => $section->{sektorbezeichnung},
+			start_percent => $pos->{startprozent},
+			end_percent => $pos->{endeprozent},
+			start_meters => $pos->{startmeter},
+			end_meters => $pos->{endemeter},
+		});
+	}
+
+	return @{$self->{sections} // []};
+}
+
 sub wagons {
 	my ($self) = @_;
 
@@ -98,6 +116,7 @@ sub wagons {
 			push(@{$self->{wagons}}, Travel::Status::DE::DBWagenreihung::Wagon->new(%{$wagon}));
 		}
 	}
+	@{$self->{wagons}} = sort { $a->{position}->{start_percent} <=> $b->{position}->{start_percent} } @{$self->{wagons}};
 	return @{$self->{wagons} // []};
 }
 
