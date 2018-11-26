@@ -33,7 +33,7 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 );
 
 for my $section ($wr->sections) {
-	my $section_length = $section->{end_percent} - $section->{start_percent};
+	my $section_length = $section->length_percent;
 	my $spacing_left = int(($section_length - 2) / 2) - 1;
 	my $spacing_right = int(($section_length - 2) / 2);
 
@@ -43,7 +43,7 @@ for my $section ($wr->sections) {
 
 	printf("|%s%s%s|",
 		' ' x $spacing_left,
-		$section->{name},
+		$section->name,
 		' ' x $spacing_right
 	);
 }

@@ -9,6 +9,7 @@ our $VERSION = '0.00';
 use Carp qw(cluck confess);
 use JSON;
 use LWP::UserAgent;
+use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
 
 sub new {
@@ -92,13 +93,13 @@ sub sections {
 
 	for my $section (@{$self->{data}{istformation}{halt}{allSektor}}) {
 		my $pos = $section->{positionamgleis};
-		push(@{$self->{sections}}, {
+		push(@{$self->{sections}}, Travel::Status::DE::DBWagenreihung::Section->new(
 			name => $section->{sektorbezeichnung},
 			start_percent => $pos->{startprozent},
 			end_percent => $pos->{endeprozent},
 			start_meters => $pos->{startmeter},
 			end_meters => $pos->{endemeter},
-		});
+		));
 	}
 
 	return @{$self->{sections} // []};
