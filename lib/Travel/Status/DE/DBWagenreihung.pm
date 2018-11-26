@@ -24,15 +24,15 @@ sub new {
 	}
 
 	my $self = {
-		api_base      => $opt{api_base}
+		api_base => $opt{api_base}
 		  // 'https://www.apps-bahn.de/wr/wagenreihung/1.0',
 		developer_mode => $opt{developer_mode},
-		cache => $opt{cache},
-		departure       => $opt{departure},
-		json => JSON->new,
-		serializable    => $opt{serializable},
-		train_number    => $opt{train_number},
-		user_agent      => $opt{user_agent},
+		cache          => $opt{cache},
+		departure      => $opt{departure},
+		json           => JSON->new,
+		serializable   => $opt{serializable},
+		train_number   => $opt{train_number},
+		user_agent     => $opt{user_agent},
 	};
 
 	bless( $self, $class );
@@ -51,17 +51,19 @@ sub new {
 sub get_wagonorder {
 	my ($self) = @_;
 
-	my $api_base = $self->{api_base};
-	my $cache = $self->{cache};
+	my $api_base     = $self->{api_base};
+	my $cache        = $self->{cache};
 	my $train_number = $self->{train_number};
 
 	my $datetime = $self->{departure};
 
-	if (ref($datetime) eq 'DateTime') {
+	if ( ref($datetime) eq 'DateTime' ) {
 		$datetime = $datetime->strftime('%Y%m%d%H%M');
 	}
 
-	my ($content, $err) = $self->get_with_cache($cache, "${api_base}/${train_number}/${datetime}");
+	my ( $content, $err )
+	  = $self->get_with_cache( $cache,
+		"${api_base}/${train_number}/${datetime}" );
 
 	if ($err) {
 		$self->{errstr} = "Failed to fetch station data: $err";
@@ -69,7 +71,7 @@ sub get_wagonorder {
 	}
 	my $json = $self->{json}->decode($content);
 
-	if (exists $json->{error}) {
+	if ( exists $json->{error} ) {
 		$self->{errstr} = 'Backend error: ' . $json->{error}{msg};
 		return;
 	}
@@ -87,38 +89,46 @@ sub error {
 sub sections {
 	my ($self) = @_;
 
-	if (exists $self->{sections}) {
-		return @{$self->{sections}};
+	if ( exists $self->{sections} ) {
+		return @{ $self->{sections} };
 	}
 
-	for my $section (@{$self->{data}{istformation}{halt}{allSektor}}) {
+	for my $section ( @{ $self->{data}{istformation}{halt}{allSektor} } ) {
 		my $pos = $section->{positionamgleis};
-		push(@{$self->{sections}}, Travel::Status::DE::DBWagenreihung::Section->new(
-			name => $section->{sektorbezeichnung},
-			start_percent => $pos->{startprozent},
-			end_percent => $pos->{endeprozent},
-			start_meters => $pos->{startmeter},
-			end_meters => $pos->{endemeter},
-		));
+		push(
+			@{ $self->{sections} },
+			Travel::Status::DE::DBWagenreihung::Section->new(
+				name          => $section->{sektorbezeichnung},
+				start_percent => $pos->{startprozent},
+				end_percent   => $pos->{endeprozent},
+				start_meters  => $pos->{startmeter},
+				end_meters    => $pos->{endemeter},
+			)
+		);
 	}
 
-	return @{$self->{sections} // []};
+	return @{ $self->{sections} // [] };
 }
 
 sub wagons {
 	my ($self) = @_;
 
-	if (exists $self->{wagons}) {
-		return @{$self->{wagons}};
+	if ( exists $self->{wagons} ) {
+		return @{ $self->{wagons} };
 	}
 
-	for my $group (@{$self->{data}{istformation}{allFahrzeuggruppe}}) {
-		for my $wagon (@{$group->{allFahrzeug}}) {
-			push(@{$self->{wagons}}, Travel::Status::DE::DBWagenreihung::Wagon->new(%{$wagon}));
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		for my $wagon ( @{ $group->{allFahrzeug} } ) {
+			push(
+				@{ $self->{wagons} },
+				Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon} )
+			);
 		}
 	}
-	@{$self->{wagons}} = sort { $a->{position}->{start_percent} <=> $b->{position}->{start_percent} } @{$self->{wagons}};
-	return @{$self->{wagons} // []};
+	@{ $self->{wagons} } = sort {
+		$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
+	} @{ $self->{wagons} };
+	return @{ $self->{wagons} // [] };
 }
 
 sub get_with_cache {

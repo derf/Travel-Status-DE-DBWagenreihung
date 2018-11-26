@@ -17,7 +17,7 @@ sub new {
 	my ( $obj, %opt ) = @_;
 	my $ref = \%opt;
 
-	$ref->{length_meters} = $ref->{end_meters} - $ref->{start_meters};
+	$ref->{length_meters}  = $ref->{end_meters} - $ref->{start_meters};
 	$ref->{length_percent} = $ref->{end_percent} - $ref->{start_percent};
 
 	return bless( $ref, $obj );
