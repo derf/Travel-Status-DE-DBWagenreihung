@@ -24,7 +24,7 @@ sub new {
 	$ref->{is_powercar} = 0;
 	$ref->{number} = $opt{wagenordnungsnummer};
 	$ref->{section} = $opt{fahrzeugsektor};
-	$ref->{type} = $opt{fahrzeugtype};
+	$ref->{type} = $opt{fahrzeugtyp};
 
 	if ($opt{kategorie} =~ m{SPEISEWAGEN}) {
 		$ref->{has_bistro} = 1;
