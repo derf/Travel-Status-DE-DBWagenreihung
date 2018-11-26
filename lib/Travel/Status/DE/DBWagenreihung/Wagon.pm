@@ -24,6 +24,7 @@ sub new {
 	$ref->{is_powercar} = 0;
 	$ref->{number} = $opt{wagenordnungsnummer};
 	$ref->{section} = $opt{fahrzeugsektor};
+	$ref->{type} = $opt{fahrzeugtype};
 
 	if ($opt{kategorie} =~ m{SPEISEWAGEN}) {
 		$ref->{has_bistro} = 1;
@@ -58,7 +59,7 @@ sub new {
 sub is_first_class {
 	my ($self) = @_;
 
-	if ($self->{fahrzeugtyp} =~ m{^A}) {
+	if ($self->{type} =~ m{^A}) {
 		return 1;
 	}
 	return 0;
@@ -67,7 +68,7 @@ sub is_first_class {
 sub is_second_class {
 	my ($self) = @_;
 
-	if ($self->{fahrzeugtyp} =~ m{^A?B}) {
+	if ($self->{type} =~ m{^A?B}) {
 		return 1;
 	}
 	return 0;
