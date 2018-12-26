@@ -13,6 +13,8 @@ use Travel::Status::DE::DBWagenreihung;
 
 my $developer_mode = 0;
 
+binmode( STDOUT, ':encoding(utf-8)' );
+
 sub show_help {
 	my ($code) = @_;
 
@@ -77,7 +79,7 @@ for my $section ( $wr->sections ) {
 		$spacing_left++;
 	}
 
-	printf( "|%s%s%s|",
+	printf( "▏%s%s%s▕",
 		' ' x $spacing_left,
 		$section->name,
 		' ' x $spacing_right );
@@ -85,7 +87,8 @@ for my $section ( $wr->sections ) {
 print "\n";
 
 my @start_percentages = map { $_->{position}{start_percent} } $wr->wagons;
-print ' ' x ( min @start_percentages );
+print ' ' x ( ( min @start_percentages ) - 1 );
+print $wr->direction == 100 ? '>' : '<';
 
 for my $wagon ( $wr->wagons ) {
 	my $wagon_length
@@ -100,7 +103,7 @@ for my $wagon ( $wr->wagons ) {
 	my $wagon_desc = $wagon->number || '?';
 
 	if ( $wagon->is_locomotive or $wagon->is_powercar ) {
-		$wagon_desc = '<->';
+		$wagon_desc = ' ■ ';
 	}
 
 	my $class_color = '';
@@ -118,4 +121,5 @@ for my $wagon ( $wr->wagons ) {
 		' ' x $spacing_left, $class_color, $wagon_desc,
 		$col_reset,          ' ' x $spacing_right );
 }
+print $wr->direction == 100 ? '>' : '<';
 print "\n";

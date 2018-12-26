@@ -86,6 +86,23 @@ sub error {
 	return $self->{errstr};
 }
 
+sub direction {
+	my ($self) = @_;
+
+	my @wagons = $self->wagons;
+
+	if ( not @wagons ) {
+		return undef;
+	}
+
+	if ( $wagons[0]->{position}{start_percent}
+		> $wagons[-1]{position}{start_percent} )
+	{
+		return 0;
+	}
+	return 100;
+}
+
 sub sections {
 	my ($self) = @_;
 
