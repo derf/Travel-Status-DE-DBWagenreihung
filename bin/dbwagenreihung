@@ -6,20 +6,48 @@ use utf8;
 
 our $VERSION = '0.00';
 
+use Getopt::Long;
 use List::Util qw(min);
 use Travel::Status::DE::IRIS;
 use Travel::Status::DE::DBWagenreihung;
 
+my $developer_mode = 0;
+
+sub show_help {
+	my ($code) = @_;
+
+	say "Usage: db-wagenreihung <station> <train number>";
+
+	exit $code;
+}
+
+sub show_version {
+	say "db-wagenreihung version ${VERSION}";
+
+	exit 0;
+}
+
+GetOptions(
+	'h|help'  => sub { show_help(0) },
+	'devmode' => \$developer_mode,
+	'version' => sub { show_version() },
+) or show_help(1);
+
+if ( @ARGV != 2 ) {
+	show_help(1);
+}
+
 my ( $station, $train_number ) = @ARGV;
 
-my $col_first = "\e[38;5;11m";
-my $col_mixed = "\e[38;5;208m";
+my $col_first  = "\e[38;5;11m";
+my $col_mixed  = "\e[38;5;208m";
 my $col_second = "\e[38;5;9m";
-my $col_reset = "\e[0m";
+my $col_reset  = "\e[0m";
 
 my $res = Travel::Status::DE::IRIS->new(
-	station      => $station,
-	with_related => 1
+	developer_mode => $developer_mode,
+	station        => $station,
+	with_related   => 1
 );
 
 if ( $res->errstr ) {
@@ -36,7 +64,7 @@ if ( @trains != 1 ) {
 
 my $wr = Travel::Status::DE::DBWagenreihung->new(
 	departure      => $trains[0]->sched_departure,
-	developer_mode => 1,
+	developer_mode => $developer_mode,
 	train_number   => $train_number,
 );
 
@@ -76,22 +104,18 @@ for my $wagon ( $wr->wagons ) {
 	}
 
 	my $class_color = '';
-	if ($wagon->class_type == 1 ) {
+	if ( $wagon->class_type == 1 ) {
 		$class_color = $col_first;
 	}
-	elsif ($wagon->class_type == 2 ) {
+	elsif ( $wagon->class_type == 2 ) {
 		$class_color = $col_second;
 	}
-	elsif ($wagon->class_type == 12 ) {
+	elsif ( $wagon->class_type == 12 ) {
 		$class_color = $col_mixed;
 	}
 
 	printf( "%s%s%3s%s%s",
-		' ' x $spacing_left,
-		$class_color,
-		$wagon_desc,
-		$col_reset,
-		' ' x $spacing_right
-	);
+		' ' x $spacing_left, $class_color, $wagon_desc,
+		$col_reset,          ' ' x $spacing_right );
 }
 print "\n";
