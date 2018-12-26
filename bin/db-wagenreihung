@@ -65,7 +65,7 @@ if ( @trains != 1 ) {
 }
 
 my $wr = Travel::Status::DE::DBWagenreihung->new(
-	departure      => $trains[0]->sched_departure,
+	departure      => $trains[0]->sched_departure || $trains[0]->sched_arrival,
 	developer_mode => $developer_mode,
 	train_number   => $train_number,
 );
