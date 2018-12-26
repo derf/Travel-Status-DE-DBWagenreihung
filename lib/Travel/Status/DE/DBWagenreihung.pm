@@ -101,6 +101,9 @@ sub sections {
 
 	for my $section ( @{ $self->{data}{istformation}{halt}{allSektor} } ) {
 		my $pos = $section->{positionamgleis};
+		if ( $pos->{startprozent} eq '' or $pos->{endeprozent} eq '' ) {
+			next;
+		}
 		push(
 			@{ $self->{sections} },
 			Travel::Status::DE::DBWagenreihung::Section->new(
