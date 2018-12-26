@@ -24,6 +24,7 @@ Module::Build->new(
 		'JSON' => 0,
 		'List::Util' => 0,
 		'LWP::UserAgent' => 0,
+		'Travel::Status::DE::IRIS' => 1.20,
 	},
 	sign => 1,
 	meta_merge => {
