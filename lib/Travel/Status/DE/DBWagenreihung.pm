@@ -89,18 +89,7 @@ sub error {
 sub direction {
 	my ($self) = @_;
 
-	my @wagons = $self->wagons;
-
-	if ( not @wagons ) {
-		return undef;
-	}
-
-	if ( $wagons[0]->{position}{start_percent}
-		> $wagons[-1]{position}{start_percent} )
-	{
-		return 0;
-	}
-	return 100;
+	return $self->{direction};
 }
 
 sub sections {
@@ -140,6 +129,16 @@ sub wagons {
 				@{ $self->{wagons} },
 				Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon} )
 			);
+		}
+	}
+	if ( @{ $self->{wagons} } > 1 ) {
+		if ( $self->{wagons}[0]->{position}{start_percent}
+			> $self->{wagons}[-1]->{position}{start_percent} )
+		{
+			$self->{direction} = 100;
+		}
+		else {
+			$self->{direction} = 0;
 		}
 	}
 	@{ $self->{wagons} } = sort {
