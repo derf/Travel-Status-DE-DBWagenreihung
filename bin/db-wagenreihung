@@ -43,7 +43,7 @@ my ( $station, $train_number ) = @ARGV;
 
 my $col_first  = "\e[38;5;11m";
 my $col_mixed  = "\e[38;5;208m";
-my $col_second = "\e[0m"; #"\e[38;5;9m";
+my $col_second = "\e[0m";          #"\e[38;5;9m";
 my $col_reset  = "\e[0m";
 
 my $res = Travel::Status::DE::IRIS->new(
@@ -122,4 +122,10 @@ for my $wagon ( $wr->wagons ) {
 		$col_reset,          ' ' x $spacing_right );
 }
 print $wr->direction == 100 ? '>' : '<';
-print "\n";
+print "\n\n";
+
+for my $wagon ( $wr->wagons ) {
+	printf( "%3s: %10s  %s\n",
+		$wagon->number || '?',
+		$wagon->type, join( q{  }, $wagon->attributes ) );
+}
