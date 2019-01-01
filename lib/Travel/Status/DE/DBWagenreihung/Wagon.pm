@@ -11,9 +11,10 @@ use Carp qw(cluck);
 our $VERSION = '0.00';
 
 Travel::Status::DE::DBWagenreihung::Wagon->mk_ro_accessors(
-	qw(attributes class_type has_ac has_accessibility has_bistro
-	has_multipurpose is_dosto is_interregio is_locomotive is_powercar number
-	section type));
+	qw(attributes class_type has_ac has_accessibility has_bistro has_compartments
+	  has_multipurpose is_dosto is_interregio is_locomotive is_powercar number
+	  section type)
+);
 
 sub new {
 	my ( $obj, %opt ) = @_;
@@ -27,7 +28,7 @@ sub new {
 	$ref->{section}       = $opt{fahrzeugsektor};
 	$ref->{type}          = $opt{fahrzeugtyp};
 
-	my $self = bless($ref, $obj);
+	my $self = bless( $ref, $obj );
 
 	$self->parse_type;
 
@@ -64,7 +65,7 @@ sub new {
 sub attributes {
 	my ($self) = @_;
 
-	return @{$self->{attributes} // []};
+	return @{ $self->{attributes} // [] };
 }
 
 sub parse_type {
@@ -73,46 +74,48 @@ sub parse_type {
 	my $type = $self->{type};
 	my @desc;
 
-	# Thanks to <https://www.deutsche-reisezugwagen.de/lexikon/erklarung-der-gattungszeichen/>
+# Thanks to <https://www.deutsche-reisezugwagen.de/lexikon/erklarung-der-gattungszeichen/>
 
-	if ($type =~ m{^D}) {
+	if ( $type =~ m{^D} ) {
 		$self->{is_dosto} = 1;
-		push(@desc, 'Doppelstock');
+		push( @desc, 'Doppelstock' );
 	}
 
-	if ($type =~ m{b}) {
+	if ( $type =~ m{b} ) {
 		$self->{has_accessibility} = 1;
-		push(@desc, 'Behindertengerechte Ausstattung');
+		push( @desc, 'Behindertengerechte Ausstattung' );
 	}
 
-	if ($type =~ m{d}) {
+	if ( $type =~ m{d} ) {
 		$self->{has_multipurpose} = 1;
-		push(@desc, 'Mehrzweckraum');
+		push( @desc, 'Mehrzweckraum' );
 	}
 
-	if ($type =~ m{f}) {
-		push(@desc, 'Steuerabteil');
+	if ( $type =~ m{f} ) {
+		push( @desc, 'Steuerabteil' );
 	}
 
-	if ($type =~ m{i}) {
+	if ( $type =~ m{i} ) {
 		$self->{is_interregio} = 1;
-		push(@desc, 'Interregiowagen');
+		push( @desc, 'Interregiowagen' );
 	}
 
-	if ($type =~ m{m}) {
+	if ( $type =~ m{m} ) {
+
 		# ?
 	}
 
-	if ($type =~ m{p}) {
+	if ( $type =~ m{p} ) {
 		$self->{has_ac} = 1;
-		push(@desc, 'klimatisiert');
-		push(@desc, 'Großraum');
+		push( @desc, 'klimatisiert' );
+		push( @desc, 'Großraum' );
 	}
 
-	if ($type =~ m{v}) {
-		$self->{has_ac} = 1;
-		push(@desc, 'klimatisiert');
-		push(@desc, 'Abteilwagen');
+	if ( $type =~ m{v} ) {
+		$self->{has_ac}           = 1;
+		$self->{has_compartments} = 1;
+		push( @desc, 'klimatisiert' );
+		push( @desc, 'Abteilwagen' );
 	}
 
 	$self->{attributes} = \@desc;
