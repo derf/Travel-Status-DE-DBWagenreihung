@@ -13,7 +13,7 @@ our $VERSION = '0.00';
 Travel::Status::DE::DBWagenreihung::Wagon->mk_ro_accessors(
 	qw(attributes class_type has_ac has_accessibility has_bistro has_compartments
 	  has_multipurpose is_dosto is_interregio is_locomotive is_powercar number
-	  section type)
+	  model section type)
 );
 
 sub new {
@@ -25,8 +25,11 @@ sub new {
 	$ref->{is_locomotive} = 0;
 	$ref->{is_powercar}   = 0;
 	$ref->{number}        = $opt{wagenordnungsnummer};
+	$ref->{model}         = $opt{fahrzeugnummer};
 	$ref->{section}       = $opt{fahrzeugsektor};
 	$ref->{type}          = $opt{fahrzeugtyp};
+
+	$ref->{model} =~ s{^.....(...)....$}{$1};
 
 	my $self = bless( $ref, $obj );
 
