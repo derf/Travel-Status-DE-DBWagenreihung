@@ -155,6 +155,64 @@ sub train_no {
 	return $self->{data}{istformation}{zugnummer};
 }
 
+sub train_subtype {
+	my ($self) = @_;
+
+	my @wagons = $self->wagons;
+
+	my %ml = (
+		'ICE 1'     => 0,
+		'ICE 2'     => 0,
+		'ICE 3'     => 0,
+		'ICE 3 V'   => 0,
+		'ICE 4'     => 0,
+		'ICE T 411' => 0,
+		'ICE T 415' => 0,
+		'IC2'       => 0,
+	);
+
+	for my $wagon (@wagons) {
+		if ( $wagon->model == 401
+			or ( $wagon->model >= 801 and $wagon->model <= 804 ) )
+		{
+			$ml{'ICE 1'}++;
+		}
+		elsif ( $wagon->model == 402
+			or ( $wagon->model >= 805 and $wagon->model <= 808 ) )
+		{
+			$ml{'ICE 2'}++;
+		}
+		elsif ( $wagon->model == 403 or $wagon->model == 406 ) {
+			$ml{'ICE 3'}++;
+		}
+		elsif ( $wagon->model == 407 ) {
+			$ml{'ICE 3 V'}++;
+		}
+		elsif ( $wagon->model == 412 or $wagon->model == 812 ) {
+			$ml{'ICE 4'}++;
+		}
+		elsif ( $wagon->model == 411 ) {
+			$ml{'ICE T 411'}++;
+		}
+		elsif ( $wagon->model == 415 ) {
+			$ml{'ICE T 415'}++;
+		}
+		elsif ( $wagon->is_dosto ) {
+			$ml{'IC2'}++;
+		}
+	}
+
+	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
+
+	if ( $ml{ $likelihood[0] } <= 2 ) {
+
+		# inconclusive
+		return '???';
+	}
+
+	return $likelihood[0];
+}
+
 sub wagons {
 	my ($self) = @_;
 

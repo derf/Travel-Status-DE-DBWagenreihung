@@ -70,8 +70,11 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 	train_number   => $train_number,
 );
 
-printf( "%s %s in %s Gleis %s\n",
-	$wr->train_type, $wr->train_no, $wr->station_name, $wr->platform );
+printf(
+	"%s %s (%s) in %s Gleis %s\n\n",
+	$wr->train_type,   $wr->train_no, $wr->train_subtype,
+	$wr->station_name, $wr->platform
+);
 
 for my $section ( $wr->sections ) {
 	my $section_length = $section->length_percent;
