@@ -92,6 +92,12 @@ sub direction {
 	return $self->{direction};
 }
 
+sub platform {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{halt}{gleisbezeichnung};
+}
+
 sub sections {
 	my ($self) = @_;
 
@@ -117,6 +123,36 @@ sub sections {
 	}
 
 	return @{ $self->{sections} // [] };
+}
+
+sub station_ds100 {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{halt}{rl100};
+}
+
+sub station_name {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{halt}{bahnhofsname};
+}
+
+sub station_uic {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{halt}{evanummer};
+}
+
+sub train_type {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{zuggattung};
+}
+
+sub train_no {
+	my ($self) = @_;
+
+	return $self->{data}{istformation}{zugnummer};
 }
 
 sub wagons {
