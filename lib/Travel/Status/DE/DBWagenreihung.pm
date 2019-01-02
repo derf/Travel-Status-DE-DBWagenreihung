@@ -158,6 +158,10 @@ sub train_no {
 sub train_subtype {
 	my ($self) = @_;
 
+	if ( exists $self->{train_subtype} ) {
+		return $self->{train_subtype};
+	}
+
 	my @wagons = $self->wagons;
 
 	my %ml = (
@@ -210,7 +214,8 @@ sub train_subtype {
 		return undef;
 	}
 
-	return $likelihood[0];
+	$self->{train_subtype} = $likelihood[0];
+	return $self->{train_subtype};
 }
 
 sub wagons {
@@ -241,6 +246,17 @@ sub wagons {
 	@{ $self->{wagons} } = sort {
 		$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
 	} @{ $self->{wagons} };
+
+	# ->train_subtype calls ->wagons, so this call must not be made before
+	# $self->{wagons} has beet set.
+	my $tt = $self->train_subtype;
+
+	if ($tt) {
+		for my $wagon ( @{ $self->{wagons} } ) {
+			$wagon->set_traintype($tt);
+		}
+	}
+
 	return @{ $self->{wagons} // [] };
 }
 
