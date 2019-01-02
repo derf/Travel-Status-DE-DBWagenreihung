@@ -202,7 +202,6 @@ sub set_traintype {
 
 	for my $attr ( @{ $type_attributes{$tt}[$index] } ) {
 		$self->{$attr} = 1;
-		say "$index -> $attr";
 	}
 }
 
