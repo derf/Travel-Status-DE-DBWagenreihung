@@ -68,13 +68,14 @@ sub attributes {
 	return @{ $self->{attributes} // [] };
 }
 
+# See also:
+# https://de.wikipedia.org/wiki/UIC-Bauart-Bezeichnungssystem_f%C3%BCr_Reisezugwagen#Kennbuchstaben
+# https://www.deutsche-reisezugwagen.de/lexikon/erklarung-der-gattungszeichen/
 sub parse_type {
 	my ($self) = @_;
 
 	my $type = $self->{type};
 	my @desc;
-
-# Thanks to <https://www.deutsche-reisezugwagen.de/lexikon/erklarung-der-gattungszeichen/>
 
 	if ( $type =~ m{^D} ) {
 		$self->{is_dosto} = 1;
@@ -88,7 +89,7 @@ sub parse_type {
 
 	if ( $type =~ m{d} ) {
 		$self->{has_multipurpose} = 1;
-		push( @desc, 'Mehrzweckraum' );
+		push( @desc, 'Mehrzweck' );
 	}
 
 	if ( $type =~ m{f} ) {
@@ -97,12 +98,11 @@ sub parse_type {
 
 	if ( $type =~ m{i} ) {
 		$self->{is_interregio} = 1;
-		push( @desc, 'Interregiowagen' );
+		push( @desc, 'Interregio' );
 	}
 
-	if ( $type =~ m{m} ) {
-
-		# ?
+	if ( $type =~ m{mm} ) {
+		push( @desc, 'modernisiert' );
 	}
 
 	if ( $type =~ m{p} ) {
@@ -111,11 +111,22 @@ sub parse_type {
 		push( @desc, 'Großraum' );
 	}
 
+	if ( $type =~ m{s} ) {
+		push( @desc, 'Sonderabteil' );
+	}
+
 	if ( $type =~ m{v} ) {
 		$self->{has_ac}           = 1;
 		$self->{has_compartments} = 1;
 		push( @desc, 'klimatisiert' );
-		push( @desc, 'Abteilwagen' );
+		push( @desc, 'Abteil' );
+	}
+
+	if ( $type =~ m{w} ) {
+		$self->{has_ac}           = 1;
+		$self->{has_compartments} = 1;
+		push( @desc, 'klimatisiert' );
+		push( @desc, 'Abteil' );
 	}
 
 	$self->{attributes} = \@desc;
