@@ -107,7 +107,6 @@ sub parse_type {
 
 	if ( $type =~ m{p} ) {
 		$self->{has_ac} = 1;
-		push( @desc, 'klimatisiert' );
 		push( @desc, 'Großraum' );
 	}
 
@@ -118,14 +117,12 @@ sub parse_type {
 	if ( $type =~ m{v} ) {
 		$self->{has_ac}           = 1;
 		$self->{has_compartments} = 1;
-		push( @desc, 'klimatisiert' );
 		push( @desc, 'Abteil' );
 	}
 
 	if ( $type =~ m{w} ) {
 		$self->{has_ac}           = 1;
 		$self->{has_compartments} = 1;
-		push( @desc, 'klimatisiert' );
 		push( @desc, 'Abteil' );
 	}
 
