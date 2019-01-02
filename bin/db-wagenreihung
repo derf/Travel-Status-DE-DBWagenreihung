@@ -72,7 +72,7 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 
 printf(
 	"%s %s (%s) in %s Gleis %s\n\n",
-	$wr->train_type,   $wr->train_no, $wr->train_subtype,
+	$wr->train_type, $wr->train_no, $wr->train_subtype // '-',
 	$wr->station_name, $wr->platform
 );
 

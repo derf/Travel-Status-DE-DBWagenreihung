@@ -207,7 +207,7 @@ sub train_subtype {
 	if ( $ml{ $likelihood[0] } <= 2 ) {
 
 		# inconclusive
-		return '???';
+		return undef;
 	}
 
 	return $likelihood[0];
