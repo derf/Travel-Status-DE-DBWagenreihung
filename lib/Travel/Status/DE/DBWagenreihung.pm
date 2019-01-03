@@ -8,6 +8,7 @@ our $VERSION = '0.00';
 
 use Carp qw(cluck confess);
 use JSON;
+use List::Util qw(uniq);
 use LWP::UserAgent;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
@@ -92,6 +93,46 @@ sub direction {
 	return $self->{direction};
 }
 
+sub origins {
+	my ($self) = @_;
+
+	if ( exists $self->{origins} ) {
+		return @{ $self->{origins} };
+	}
+
+	my @origins;
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		push( @origins, $group->{startbetriebsstellename} );
+	}
+
+	@origins = uniq @origins;
+
+	$self->{origins} = \@origins;
+
+	return @origins;
+}
+
+sub destinations {
+	my ($self) = @_;
+
+	if ( exists $self->{destinations} ) {
+		return @{ $self->{destinations} };
+	}
+
+	my @destinations;
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		push( @destinations, $group->{zielbetriebsstellename} );
+	}
+
+	@destinations = uniq @destinations;
+
+	$self->{destinations} = \@destinations;
+
+	return @destinations;
+}
+
 sub platform {
 	my ($self) = @_;
 
@@ -147,6 +188,26 @@ sub train_type {
 	my ($self) = @_;
 
 	return $self->{data}{istformation}{zuggattung};
+}
+
+sub train_numbers {
+	my ($self) = @_;
+
+	if ( exists $self->{train_numbers} ) {
+		return @{ $self->{train_numbers} };
+	}
+
+	my @numbers;
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		push( @numbers, $group->{verkehrlichezugnummer} );
+	}
+
+	@numbers = uniq @numbers;
+
+	$self->{train_numbers} = \@numbers;
+
+	return @numbers;
 }
 
 sub train_no {

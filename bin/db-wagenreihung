@@ -71,9 +71,13 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 );
 
 printf(
-	"%s %s (%s) in %s Gleis %s\n\n",
-	$wr->train_type, $wr->train_no, $wr->train_subtype // '-',
-	$wr->station_name, $wr->platform
+	"%s: %s → %s  (%s)\n%s Gleis %s\n\n",
+	join( ' / ', map { $wr->train_type . ' ' . $_ } $wr->train_numbers ),
+	join( ' / ', $wr->origins ),
+	join( ' / ', $wr->destinations ),
+	$wr->train_subtype // 'IC?',
+	$wr->station_name,
+	$wr->platform
 );
 
 for my $section ( $wr->sections ) {
