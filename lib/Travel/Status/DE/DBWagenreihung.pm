@@ -70,7 +70,7 @@ sub get_wagonorder {
 		$self->{errstr} = "Failed to fetch station data: $err";
 		return;
 	}
-	my $json = $self->{json}->decode($content);
+	my $json = $self->{json}->utf8->decode($content);
 
 	if ( exists $json->{error} ) {
 		$self->{errstr} = 'Backend error: ' . $json->{error}{msg};
