@@ -73,7 +73,7 @@ sub new {
 	$ref->{section}       = $opt{fahrzeugsektor};
 	$ref->{type}          = $opt{fahrzeugtyp};
 
-	$ref->{model} =~ s{^.....(...)....$}{$1};
+	$ref->{model} =~ s{^.....(...)....$}{$1} or $ref->{model} = undef;
 
 	my $self = bless( $ref, $obj );
 

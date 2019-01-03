@@ -176,6 +176,9 @@ sub train_subtype {
 	);
 
 	for my $wagon (@wagons) {
+		if ( not $wagon->model ) {
+			next;
+		}
 		if ( $wagon->model == 401
 			or ( $wagon->model >= 801 and $wagon->model <= 804 ) )
 		{

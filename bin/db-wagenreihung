@@ -134,6 +134,7 @@ for my $wagon ( $wr->wagons ) {
 	printf(
 		"%3s: %3s %10s  %s\n",
 		$wagon->number || '?',
-		$wagon->model, $wagon->type, join( q{  }, $wagon->attributes )
+		$wagon->model  || '???',
+		$wagon->type, join( q{  }, $wagon->attributes )
 	);
 }
