@@ -58,6 +58,11 @@ our %type_attributes = (
 		undef, undef, ['has_family_area'],
 		[ 'has_quiet_area', 'has_bahn_comfort' ]    # (5) (6) 7 8
 	],
+	'IC2' => [
+		[ 'has_family_area', 'has_bike_storage' ], ['has_bike_storage'],   # 1 2
+		['has_bike_storage'], [ 'has_bike_storage', 'has_bahn_comfort' ],  # 3 4
+		[ 'has_bahn_comfort', 'has_quiet_area', 'has_phone_area' ]         # 5
+	],
 );
 
 sub new {
