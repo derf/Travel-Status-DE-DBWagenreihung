@@ -213,7 +213,7 @@ sub set_traintype {
 sub is_first_class {
 	my ($self) = @_;
 
-	if ( $self->{type} =~ m{^A} ) {
+	if ( $self->{type} =~ m{^D?A} ) {
 		return 1;
 	}
 	return 0;
@@ -222,7 +222,7 @@ sub is_first_class {
 sub is_second_class {
 	my ($self) = @_;
 
-	if ( $self->{type} =~ m{^A?B} ) {
+	if ( $self->{type} =~ m{^D?A?B} ) {
 		return 1;
 	}
 	return 0;
