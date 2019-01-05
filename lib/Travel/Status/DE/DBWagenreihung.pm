@@ -121,12 +121,20 @@ sub destinations {
 	}
 
 	my @destinations;
+	my %section;
 
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		push( @destinations, $group->{zielbetriebsstellename} );
+		my $destination = $group->{zielbetriebsstellename};
+		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
+		@sections = uniq @sections;
+		push( @{ $section{$destination} }, @sections );
+		push( @destinations,               $destination );
 	}
 
 	@destinations = uniq @destinations;
+
+	@destinations
+	  = map { { name => $_, sections => $section{$_} } } @destinations;
 
 	$self->{destinations} = \@destinations;
 

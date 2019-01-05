@@ -74,7 +74,12 @@ printf(
 	"%s: %s → %s  (%s)\n%s Gleis %s\n\n",
 	join( ' / ', map { $wr->train_type . ' ' . $_ } $wr->train_numbers ),
 	join( ' / ', $wr->origins ),
-	join( ' / ', $wr->destinations ),
+	join(
+		' / ',
+		map {
+			sprintf( '%s (%s)', $_->{name}, join( q{}, @{ $_->{sections} } ) )
+		} $wr->destinations
+	),
 	$wr->train_subtype // 'IC?',
 	$wr->station_name,
 	$wr->platform
