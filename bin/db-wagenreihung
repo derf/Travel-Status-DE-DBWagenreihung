@@ -147,3 +147,47 @@ for my $wagon ( $wr->wagons ) {
 		$wagon->type, join( q{  }, $wagon->attributes )
 	);
 }
+
+__END__
+
+=head1 NAME
+
+db-wagenreihung - Interface to Deutsche Bahn Wagon Order API
+
+=head1 SYNOPSIS
+
+B<db-wagenreihung> I<station> I<train-number>
+
+=head1 VERSION
+
+version 0.00
+
+=head1 DESCRIPTION
+
+db-wagenreihung shows wagon orders as reported by the Deutsche Bahn Wagon Order
+API. At the moment, only long-distance ICE trains operated by Deutsche
+Bahn are supported. Most IC/EC lines also work, but results may not be
+entirely correct.
+
+The departure of I<train-number> must be in the time range between now and
+two hours in the future.
+
+=head1 DEPENDENCIES
+
+=over
+
+=item * JSON(3pm)
+
+=item * LWP::UserAgent(3pm)
+
+=item * Travel::Status::DE::IRIS(3pm)
+
+=back
+
+=head1 AUTHOR
+
+Copyright (C) 2018-2019 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+
+=head1 LICENSE
+
+This program is licensed under the same terms as Perl itself.
