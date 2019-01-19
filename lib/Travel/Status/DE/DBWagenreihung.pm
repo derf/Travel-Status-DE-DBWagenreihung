@@ -369,3 +369,172 @@ sub get_with_cache {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
+
+=head1 SYNOPSIS
+
+    use Travel::Status::DE::DBWagenreihung;
+
+    my $wr = Travel::Status::DE::DBWagenreihung->new(
+        departure => 'DateTime or YYYYMMDDhhmm',
+        train_number => 1234,
+    );
+
+    for my $wagon ( $wr->wagons ) {
+        printf("Wagen %s: Abschnitt %s\n", $wagon->number // '?', $wagon->section);
+    }
+
+=head1 VERSION
+
+version 0.00
+
+=head1 DESCRIPTION
+
+Travel:Status:DE::DBWagenreihung is an unofficial interface to the Deutsche
+Bahn Wagon Order API at L<https://www.apps-bahn.de/wr/wagenreihung/1.0>.  It
+returns station-specific wagon orders for long-distance trains operated by
+Deutsche Bahn. Data includes wagon positions on the platform, the ICE series,
+wagon-specific attributes such as first/second class or family coaches, and the
+internal type and number of each wagon.
+
+Positions on the platform are given both in meters and per cent (relative to
+platform length).
+
+At the time of this writing, only ICE trains are officially supported by the
+backend, and even then glitches may occur. IC/EC trains are not officially
+supported; reported wagon orders may be correct, may lack unscheduled changes,
+or may be completely bogus.
+
+=head1 METHODS
+
+=over
+
+=item my $wr = Travel::Status::DE::DBWagenreihung->new(I<%opts>)
+
+Requests wagon order for a specific train at a specific scheduled departure
+time and date, which implicitly encodes the requested station. Use
+L<Travel::Status::DE::IRIS> or similar to map station name and train number
+to scheduled departure.
+
+Arguments:
+
+=over
+
+=item B<departure> => I<datetime-obj> | I<YYYYMMDDhhmm>
+
+Scheduled departure at the station of interested. Must be either a
+L<DateTime> object or a string in YYYYMMDDhhmm format. Mandatory.
+
+=item B<train_number> => I<number>
+
+Train number. Do not include the train type: Use "8" for "EC 8" or
+"100" for "ICE 100".
+
+=back
+
+=item $wr->destinations
+
+Returns a list describing all final destinations of this train. In most
+cases, it contains one element, however, for trains consisting of multiple
+wings, it contains one element for each wing.
+
+Each destination is a hash ref containing the destination B<name> and the
+corresponding platform I<sections> (at the moment, this is a list of section
+identifiers).
+
+This function is subject to change.
+
+=item $wr->direction
+
+Gives the train's direction of travel. Returns 0 if the train will depart
+towards position 0 and 100 if the train will depart towards the other platform
+end (mnemonic: towards the 100% position).
+
+=item $wr->error
+
+In case of a fatal HTTP or backend error, returns a string describing it.
+Returns undef otherwise.
+
+=item $wr->origins
+
+Returns a list of stations this train originates from. In most cases, this is
+just one element; however, for trains consisting of multiple wings, it gives
+the origin of each wing unless they are identical.
+
+Each origin is a station name.
+
+This function is subject to change.
+
+=item $wr->platform
+
+Returns the platform name.
+
+=item $wr->sections
+
+Describes the sections of the platform this train will depart from.
+Returns a list of L<Travel::Status::DE::DBWagenreihung::Section> objects.
+
+=item $wr->station_ds100
+
+Returns the DS100 identifier of the requested station.
+
+=item $wr->station_name
+
+Returns the name of the requested station.
+
+=item $wr->station_uic
+
+Returns the international id (UIC ID / IBNR) of the requested station.
+
+=item $wr->train_numbers
+
+Returns the list of train numbers for this departure. In most cases, this is
+just one element. For trains consisting of multiple wings (which typically have
+different numbers), it contains one element for each wing.
+
+=item $wr->train_type
+
+Returns a string describing the train type, e.g. "ICE" or "IC".
+
+=item $wr->train_subtype
+
+Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
+or "IC2".
+
+=item $wr->wagons
+
+Describes the individual wagons the train consists of. Returns a list of
+L<Travel::Status::DE::DBWagenreihung::Wagon> objects.
+
+=back
+
+=head1 DEPENDENCIES
+
+=over
+
+=item * L<JSON>
+
+=item * L<LWP::UserAgent>
+
+=back
+
+=head1 BUGS AND LIMITATIONS
+
+Many. This is beta software.
+
+=head1 REPOSITORY
+
+L<https://github.com/derf/Travel-Status-DE-DBWagenreihung>
+
+=head1 AUTHOR
+
+Copyright (C) 2018-2019 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+
+=head1 LICENSE
+
+This module is licensed under the same terms as Perl itself.
