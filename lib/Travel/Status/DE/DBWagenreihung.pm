@@ -305,7 +305,7 @@ sub wagons {
 			);
 		}
 	}
-	if ( @{ $self->{wagons} } > 1 ) {
+	if ( @{ $self->{wagons} // [] } > 1 ) {
 		if ( $self->{wagons}[0]->{position}{start_percent}
 			> $self->{wagons}[-1]->{position}{start_percent} )
 		{
