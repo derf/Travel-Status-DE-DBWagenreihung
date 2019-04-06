@@ -77,6 +77,13 @@ sub get_wagonorder {
 		return;
 	}
 
+	if (    @{ $json->{data}{istformation}{allFahrzeuggruppe} // [] } == 0
+		and @{ $json->{data}{istformation}{halt} // [] } == 0 )
+	{
+		$self->{errstr} = 'No wagon order available';
+		return;
+	}
+
 	$self->{data} = $json->{data};
 	$self->{meta} = $json->{meta};
 }
