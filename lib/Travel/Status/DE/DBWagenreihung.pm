@@ -81,7 +81,7 @@ sub get_wagonorder {
 	$self->{meta} = $json->{meta};
 }
 
-sub error {
+sub errstr {
 	my ($self) = @_;
 
 	return $self->{errstr};
@@ -455,7 +455,7 @@ Gives the train's direction of travel. Returns 0 if the train will depart
 towards position 0 and 100 if the train will depart towards the other platform
 end (mnemonic: towards the 100% position).
 
-=item $wr->error
+=item $wr->errstr
 
 In case of a fatal HTTP or backend error, returns a string describing it.
 Returns undef otherwise.
