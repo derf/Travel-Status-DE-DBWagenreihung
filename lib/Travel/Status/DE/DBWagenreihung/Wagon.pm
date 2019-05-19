@@ -111,6 +111,17 @@ sub new {
 	$ref->{position}{start_meters}  = $pos->{startmeter};
 	$ref->{position}{end_meters}    = $pos->{endemeter};
 
+	if (   $pos->{startprozent} eq ''
+		or $pos->{endeprozent} eq ''
+		or $pos->{startmeter} eq ''
+		or $pos->{endemeter} eq '' )
+	{
+		$ref->{position}{valid} = 0;
+	}
+	else {
+		$ref->{position}{valid} = 1;
+	}
+
 	return $self;
 }
 

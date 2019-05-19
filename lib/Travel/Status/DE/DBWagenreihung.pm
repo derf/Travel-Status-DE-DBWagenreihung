@@ -100,6 +100,29 @@ sub direction {
 	return $self->{direction};
 }
 
+sub has_bad_wagons {
+	my ($self) = @_;
+
+	if ( defined $self->{has_bad_wagons} ) {
+		return $self->{has_bad_wagons};
+	}
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		for my $wagon ( @{ $group->{allFahrzeug} } ) {
+			my $pos = $wagon->{positionamhalt};
+			if (   $pos->{startprozent} eq ''
+				or $pos->{endeprozent} eq ''
+				or $pos->{startmeter} eq ''
+				or $pos->{endemeter} eq '' )
+			{
+				return $self->{has_bad_wagons} = 1;
+			}
+		}
+	}
+
+	return $self->{has_bad_wagons} = 0;
+}
+
 sub origins {
 	my ($self) = @_;
 
@@ -306,13 +329,15 @@ sub wagons {
 
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
 		for my $wagon ( @{ $group->{allFahrzeug} } ) {
-			push(
-				@{ $self->{wagons} },
-				Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon} )
-			);
+			my $wagon_object
+			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon} );
+			push( @{ $self->{wagons} }, $wagon_object );
+			if ( not $wagon_object->{position}{valid} ) {
+				$self->{has_bad_wagons} = 1;
+			}
 		}
 	}
-	if ( @{ $self->{wagons} // [] } > 1 ) {
+	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
 		if ( $self->{wagons}[0]->{position}{start_percent}
 			> $self->{wagons}[-1]->{position}{start_percent} )
 		{
@@ -322,9 +347,11 @@ sub wagons {
 			$self->{direction} = 0;
 		}
 	}
-	@{ $self->{wagons} } = sort {
-		$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
-	} @{ $self->{wagons} };
+	if ( not $self->has_bad_wagons ) {
+		@{ $self->{wagons} } = sort {
+			$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
+		} @{ $self->{wagons} };
+	}
 
 	# ->train_subtype calls ->wagons, so this call must not be made before
 	# $self->{wagons} has beet set.
