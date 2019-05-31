@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.020;
 
-our $VERSION = '0.00';
+our $VERSION = '0.01';
 
 use Carp qw(cluck confess);
 use JSON;
@@ -425,7 +425,7 @@ Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
 
 =head1 VERSION
 
-version 0.00
+version 0.01
 
 =head1 DESCRIPTION
 
