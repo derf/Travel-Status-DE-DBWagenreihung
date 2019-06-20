@@ -30,6 +30,7 @@ sub new {
 		developer_mode => $opt{developer_mode},
 		cache          => $opt{cache},
 		departure      => $opt{departure},
+		from_json      => $opt{from_json},
 		json           => JSON->new,
 		serializable   => $opt{serializable},
 		train_number   => $opt{train_number},
@@ -62,15 +63,19 @@ sub get_wagonorder {
 		$datetime = $datetime->strftime('%Y%m%d%H%M');
 	}
 
-	my ( $content, $err )
-	  = $self->get_with_cache( $cache,
-		"${api_base}/${train_number}/${datetime}" );
+	my $json = $self->{from_json};
 
-	if ($err) {
-		$self->{errstr} = "Failed to fetch station data: $err";
-		return;
+	if ( not $json ) {
+		my ( $content, $err )
+		  = $self->get_with_cache( $cache,
+			"${api_base}/${train_number}/${datetime}" );
+
+		if ($err) {
+			$self->{errstr} = "Failed to fetch station data: $err";
+			return;
+		}
+		$json = $self->{json}->utf8->decode($content);
 	}
-	my $json = $self->{json}->utf8->decode($content);
 
 	if ( exists $json->{error} ) {
 		$self->{errstr} = 'Backend error: ' . $json->{error}{msg};
