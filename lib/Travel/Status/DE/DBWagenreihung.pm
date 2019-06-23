@@ -102,6 +102,12 @@ sub errstr {
 sub direction {
 	my ($self) = @_;
 
+	if ( not exists $self->{direction} ) {
+
+		# direction is set while parsing wagons
+		$self->wagons;
+	}
+
 	return $self->{direction};
 }
 
