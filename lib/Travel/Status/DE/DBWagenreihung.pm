@@ -16,11 +16,11 @@ use Travel::Status::DE::DBWagenreihung::Wagon;
 sub new {
 	my ( $class, %opt ) = @_;
 
-	if ( not $opt{train_number} ) {
+	if ( not $opt{train_number} and not $opt{from_json} ) {
 		confess('train_number option must be set');
 	}
 
-	if ( not $opt{departure} ) {
+	if ( not $opt{departure} and not $opt{from_json} ) {
 		confess('departure option must be set');
 	}
 
