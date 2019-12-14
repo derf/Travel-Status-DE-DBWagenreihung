@@ -272,7 +272,8 @@ sub train_subtype {
 		return $self->{train_subtype};
 	}
 
-	my @wagons = $self->wagons;
+	my @wagons          = $self->wagons;
+	my $with_restaurant = 0;
 
 	my %ml = (
 		'ICE 1'     => 0,
@@ -289,6 +290,9 @@ sub train_subtype {
 		if ( not $wagon->model ) {
 			next;
 		}
+		if ( $wagon->type eq 'WRmz' ) {
+			$with_restaurant = 1;
+		}
 		if ( $wagon->model == 401
 			or ( $wagon->model >= 801 and $wagon->model <= 804 ) )
 		{
@@ -303,18 +307,18 @@ sub train_subtype {
 			$ml{'ICE 3'}++;
 		}
 		elsif ( $wagon->model == 407 ) {
-			$ml{'ICE 3 V'}++;
+			$ml{'ICE 3 Velaro'}++;
 		}
 		elsif ( $wagon->model == 412 or $wagon->model == 812 ) {
 			$ml{'ICE 4'}++;
 		}
-		elsif ( $wagon->model == 411 ) {
-			$ml{'ICE T 411'}++;
+		elsif ( $wagon->model == 411 or $wagon->model == 415 ) {
+			$ml{'ICE T'}++;
 		}
-		elsif ( $wagon->model == 415 ) {
-			$ml{'ICE T 415'}++;
+		elsif ( $wagon->model == 475 ) {
+			$ml{'TGV'}++;
 		}
-		elsif ( $wagon->is_dosto ) {
+		elsif ( $self->train_type eq 'IC' and $wagon->is_dosto ) {
 			$ml{'IC2'}++;
 		}
 	}
@@ -328,6 +332,10 @@ sub train_subtype {
 	}
 
 	$self->{train_subtype} = $likelihood[0];
+
+	if ( $self->{train_subtype} eq 'ICE 3' and $with_restaurant ) {
+		$self->{train_subtype} = 'ICE 3 Redesign';
+	}
 	return $self->{train_subtype};
 }
 
