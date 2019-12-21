@@ -349,7 +349,8 @@ sub wagons {
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
 		for my $wagon ( @{ $group->{allFahrzeug} } ) {
 			my $wagon_object
-			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon} );
+			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon},
+				train_no => $group->{verkehrlichezugnummer} );
 			push( @{ $self->{wagons} }, $wagon_object );
 			if ( not $wagon_object->{position}{valid} ) {
 				$self->{has_bad_wagons} = 1;
