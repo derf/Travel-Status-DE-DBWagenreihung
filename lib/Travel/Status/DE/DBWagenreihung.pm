@@ -265,6 +265,39 @@ sub train_no {
 	return $self->{data}{istformation}{zugnummer};
 }
 
+sub train_powertype {
+	my ($self) = @_;
+
+	if ( exists $self->{train_powertype} ) {
+		return $self->{train_powertype};
+	}
+
+	my @wagons = $self->wagons;
+	my %ml     = map { $_ => 0 } ( 90 .. 99 );
+
+	for my $wagon (@wagons) {
+
+		if ( not $wagon->uic_id or length( $wagon->uic_id ) != 12 ) {
+			next;
+		}
+
+		my $wagon_type = substr( $wagon->uic_id, 0, 2 );
+		if ( $wagon_type < 90 ) {
+			next;
+		}
+
+		$ml{$wagon_type}++;
+	}
+
+	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
+
+	if ( $ml{ $likelihood[0] } == 0 ) {
+		return $self->{train_powertype} = undef;
+	}
+
+	return $self->{train_powertype} = $likelihood[0];
+}
+
 sub train_subtype {
 	my ($self) = @_;
 
