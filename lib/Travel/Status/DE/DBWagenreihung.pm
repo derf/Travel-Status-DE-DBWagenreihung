@@ -480,6 +480,8 @@ Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
 
 version 0.02
 
+This is beta software. The API may change without notice.
+
 =head1 DESCRIPTION
 
 Travel:Status:DE::DBWagenreihung is an unofficial interface to the Deutsche
