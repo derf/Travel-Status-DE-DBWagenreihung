@@ -34,7 +34,7 @@ our %type_attributes = (
 		['has_family_area'], undef, ['has_bahn_comfort'],        # 5 6 7
 		[ 'has_quiet_area', 'has_phone_area', 'has_bahn_comfort' ], undef  # 8 9
 	],
-	'ICE 3 V' => [
+	'ICE 3 Velaro' => [
 		['has_quiet_area'], undef, undef, ['has_family_area'],    # 1 2 3 4
 		['has_bahn_comfort'], ['has_bahn_comfort'], undef, undef, # 5 6 (7) 8
 		[ 'has_quiet_area', 'has_phone_area' ]                    # 9

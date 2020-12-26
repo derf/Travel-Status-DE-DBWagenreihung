@@ -312,7 +312,7 @@ sub train_subtype {
 		'ICE 1'        => 0,
 		'ICE 2'        => 0,
 		'ICE 3'        => 0,
-		'ICE 3 V'      => 0,
+		'ICE 3 Velaro' => 0,
 		'ICE 4'        => 0,
 		'ICE T 411'    => 0,
 		'ICE T 415'    => 0,
@@ -346,8 +346,11 @@ sub train_subtype {
 		elsif ( $wagon->model == 412 or $wagon->model == 812 ) {
 			$ml{'ICE 4'}++;
 		}
-		elsif ( $wagon->model == 411 or $wagon->model == 415 ) {
-			$ml{'ICE T'}++;
+		elsif ( $wagon->model == 411 ) {
+			$ml{'ICE T 411'}++;
+		}
+		elsif ( $wagon->model == 415 ) {
+			$ml{'ICE T 415'}++;
 		}
 		elsif ( $wagon->model == 475 ) {
 			$ml{'TGV'}++;
