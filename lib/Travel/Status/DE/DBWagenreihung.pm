@@ -309,14 +309,15 @@ sub train_subtype {
 	my $with_restaurant = 0;
 
 	my %ml = (
-		'ICE 1'     => 0,
-		'ICE 2'     => 0,
-		'ICE 3'     => 0,
-		'ICE 3 V'   => 0,
-		'ICE 4'     => 0,
-		'ICE T 411' => 0,
-		'ICE T 415' => 0,
-		'IC2'       => 0,
+		'ICE 1'        => 0,
+		'ICE 2'        => 0,
+		'ICE 3'        => 0,
+		'ICE 3 V'      => 0,
+		'ICE 4'        => 0,
+		'ICE T 411'    => 0,
+		'ICE T 415'    => 0,
+		'IC2 Twindexx' => 0,
+		'IC2 KISS'     => 0,
 	);
 
 	for my $wagon (@wagons) {
@@ -351,8 +352,11 @@ sub train_subtype {
 		elsif ( $wagon->model == 475 ) {
 			$ml{'TGV'}++;
 		}
+		elsif ( $self->train_type eq 'IC' and $wagon->model == 110 ) {
+			$ml{'IC2 KISS'}++;
+		}
 		elsif ( $self->train_type eq 'IC' and $wagon->is_dosto ) {
-			$ml{'IC2'}++;
+			$ml{'IC2 Twindexx'}++;
 		}
 	}
 
@@ -593,7 +597,7 @@ Returns a string describing the train type, e.g. "ICE" or "IC".
 =item $wr->train_subtype
 
 Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
-or "IC2".
+or "IC2 KISS".
 
 =item $wr->wagons
 
