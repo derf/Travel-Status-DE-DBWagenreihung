@@ -1,3 +1,7 @@
+Travel::Status::DE::DBWagenreihung 0.05 - Sat Dec 26 2020
+
+    * Distinguish between ICE 3 403 series 1/2 and ICE T 411 series 1/2
+
 Travel::Status::DE::DBWagenreihung 0.04 - Sat Dec 26 2020
 
     * Distinguish between IC2 KISS / IC2 Twindexx and ICE T 411 / ICE T 415
