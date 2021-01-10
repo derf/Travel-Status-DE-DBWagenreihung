@@ -226,7 +226,6 @@ sub destinations {
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
 		my $destination = $group->{zielbetriebsstellename};
 		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
-		@sections = uniq @sections;
 		push( @{ $section{$destination} }, @sections );
 		push( @destinations,               $destination );
 	}
@@ -234,7 +233,8 @@ sub destinations {
 	@destinations = uniq @destinations;
 
 	@destinations
-	  = map { { name => $_, sections => $section{$_} } } @destinations;
+	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } }
+	  @destinations;
 
 	$self->{destinations} = \@destinations;
 
@@ -324,15 +324,15 @@ sub train_no {
 	return $self->{data}{istformation}{zugnummer};
 }
 
+# TODO rename to wagongrop_powertype
 sub train_powertype {
-	my ($self) = @_;
+	my ( $self, @wagons ) = @_;
 
-	if ( exists $self->{train_powertype} ) {
-		return $self->{train_powertype};
+	if ( not @wagons ) {
+		@wagons = $self->wagons;
 	}
 
-	my @wagons = $self->wagons;
-	my %ml     = map { $_ => 0 } ( 90 .. 99 );
+	my %ml = map { $_ => 0 } ( 90 .. 99 );
 
 	for my $wagon (@wagons) {
 
@@ -351,12 +351,51 @@ sub train_powertype {
 	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
 
 	if ( $ml{ $likelihood[0] } == 0 ) {
-		return $self->{train_powertype} = undef;
+		return undef;
 	}
 
-	return $self->{train_powertype} = $likelihood[0];
+	return $likelihood[0];
 }
 
+sub train_descriptions {
+	my ($self) = @_;
+
+	my @ret;
+
+	for my $wagons ( @{ $self->{wagongroups} } ) {
+		my $powertype = $self->train_powertype( @{$wagons} );
+		my @model     = $self->train_model( @{$wagons} );
+		my $desc      = q{};
+
+		my @sections = uniq map { $_->section } @{$wagons};
+
+		if (@model) {
+			$desc .= $model[0];
+		}
+
+		if ( $powertype and $power_desc{$powertype} ) {
+			if ( not $desc and $power_desc{$powertype} =~ m{^mit} ) {
+				$desc = "Zug";
+			}
+			$desc .= " $power_desc{$powertype}";
+		}
+
+		if ( @model > 1 ) {
+			$desc .= " ($model[1])";
+		}
+		push(
+			@ret,
+			{
+				sections => [@sections],
+				text     => $desc,
+			}
+		);
+	}
+
+	return @ret;
+}
+
+# TODO rename to wagongroup_desc
 sub train_desc {
 	my ($self) = @_;
 
@@ -383,10 +422,11 @@ sub train_desc {
 	return $ret;
 }
 
+# TODO rename to wagongroup_model
 sub train_model {
-	my ($self) = @_;
+	my ( $self, @wagons ) = @_;
 
-	my $subtype = $self->train_subtype;
+	my $subtype = $self->train_subtype(@wagons);
 
 	if ( $subtype and $model_name{$subtype} ) {
 		return @{ $model_name{$subtype} };
@@ -397,14 +437,13 @@ sub train_model {
 	return;
 }
 
+# TODO rename to wagongroup_subtype
 sub train_subtype {
-	my ($self) = @_;
+	my ( $self, @wagons ) = @_;
 
-	if ( exists $self->{train_subtype} ) {
-		return $self->{train_subtype};
+	if ( not @wagons ) {
+		@wagons = $self->wagons;
 	}
-
-	my @wagons = $self->wagons;
 
 	my %ml = (
 		'401'      => 0,
@@ -487,9 +526,7 @@ sub train_subtype {
 		return undef;
 	}
 
-	$self->{train_subtype} = $likelihood[0];
-
-	return $self->{train_subtype};
+	return $likelihood[0];
 }
 
 sub wagons {
@@ -499,16 +536,21 @@ sub wagons {
 		return @{ $self->{wagons} };
 	}
 
+	my @wagon_groups;
+
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		my @group;
 		for my $wagon ( @{ $group->{allFahrzeug} } ) {
 			my $wagon_object
 			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon},
 				train_no => $group->{verkehrlichezugnummer} );
 			push( @{ $self->{wagons} }, $wagon_object );
+			push( @group,               $wagon_object );
 			if ( not $wagon_object->{position}{valid} ) {
 				$self->{has_bad_wagons} = 1;
 			}
 		}
+		push( @wagon_groups, [@group] );
 	}
 	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
 		if ( $self->{wagons}[0]->{position}{start_percent}
@@ -526,15 +568,16 @@ sub wagons {
 		} @{ $self->{wagons} };
 	}
 
-	# ->train_subtype calls ->wagons, so this call must not be made before
-	# $self->{wagons} has beet set.
-	my $tt = $self->train_subtype;
-
-	if ($tt) {
-		for my $wagon ( @{ $self->{wagons} } ) {
-			$wagon->set_traintype($tt);
+	for my $group (@wagon_groups) {
+		my $tt = $self->train_subtype( @{$group} );
+		if ($tt) {
+			for my $wagon ( @{$group} ) {
+				$wagon->set_traintype($tt);
+			}
 		}
 	}
+
+	$self->{wagongroups} = [@wagon_groups];
 
 	return @{ $self->{wagons} // [] };
 }
@@ -699,6 +742,13 @@ Returns the name of the requested station.
 =item $wr->station_uic
 
 Returns the international id (UIC ID / IBNR) of the requested station.
+
+=item $wr->train_descriptions
+
+Returns a list of hashes describing the rolling stock used for this train based
+on model and locomotive (if present). Each hash contains the keys B<text>
+(textual representation, see C<< $wr->train_desc >>) and B<sections>
+(arrayref of corresponding sections).
 
 =item $wr->train_desc
 

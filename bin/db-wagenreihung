@@ -71,7 +71,7 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 );
 
 printf(
-	"%s: %s → %s  (%s)\n%s Gleis %s\n\n",
+	"%s: %s → %s\n",
 	join( ' / ', map { $wr->train_type . ' ' . $_ } $wr->train_numbers ),
 	join( ' / ', $wr->origins ),
 	join(
@@ -80,10 +80,9 @@ printf(
 			sprintf( '%s (%s)', $_->{name}, join( q{}, @{ $_->{sections} } ) )
 		} $wr->destinations
 	),
-	$wr->train_desc,
-	$wr->station_name,
-	$wr->platform
 );
+
+printf( "%s Gleis %s\n\n", $wr->station_name, $wr->platform );
 
 for my $section ( $wr->sections ) {
 	my $section_length = $section->length_percent;
@@ -138,6 +137,15 @@ for my $wagon ( $wr->wagons ) {
 }
 print $wr->direction == 100 ? '>' : '<';
 print "\n\n";
+
+for my $desc ( $wr->train_descriptions ) {
+	if ( $desc->{text} ) {
+		printf( "%s (%s)\n",
+			$desc->{text}, join( q{}, @{ $desc->{sections} } ) );
+	}
+}
+
+say "";
 
 for my $wagon ( $wr->wagons ) {
 	printf(
