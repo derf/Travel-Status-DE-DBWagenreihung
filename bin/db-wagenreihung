@@ -80,7 +80,7 @@ printf(
 			sprintf( '%s (%s)', $_->{name}, join( q{}, @{ $_->{sections} } ) )
 		} $wr->destinations
 	),
-	$wr->train_subtype // 'IC?',
+	$wr->train_desc,
 	$wr->station_name,
 	$wr->platform
 );

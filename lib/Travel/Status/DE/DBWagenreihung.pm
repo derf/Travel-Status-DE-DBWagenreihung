@@ -13,6 +13,65 @@ use LWP::UserAgent;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
 
+my %is_redesign = (
+	"02" => 1,
+	"03" => 1,
+	"06" => 1,
+	"09" => 1,
+	"10" => 1,
+	"13" => 1,
+	"14" => 1,
+	"15" => 1,
+	"16" => 1,
+	"18" => 1,
+	"19" => 1,
+	"20" => 1,
+	"23" => 1,
+	"24" => 1,
+	"27" => 1,
+	"28" => 1,
+	"29" => 1,
+	"31" => 1,
+	"32" => 1,
+	"33" => 1,
+	"34" => 1,
+	"35" => 1,
+	"36" => 1,
+	"37" => 1,
+	"53" => 1
+);
+
+my %model_name = (
+	'401'      => ['ICE 1'],
+	'402'      => ['ICE 2'],
+	'403.S1'   => [ 'ICE 3', 'BR 403, 1. Serie' ],
+	'403.S2'   => [ 'ICE 3', 'BR 403, 2. Serie' ],
+	'403.R'    => [ 'ICE 3', 'BR 403 Redesign' ],
+	'406'      => [ 'ICE 3', 'BR 406' ],
+	'406.R'    => [ 'ICE 3', 'BR 406 Redesign' ],
+	'407'      => [ 'ICE 3 Velaro', 'BR 407' ],
+	'411.S1'   => [ 'ICE T', 'BR 411, 1. Serie' ],
+	'411.S2'   => [ 'ICE T', 'BR 411, 2. Serie' ],
+	'412'      => ['ICE 4'],
+	'415'      => [ 'ICE T', 'BR 415' ],
+	'475'      => [ 'TGV', 'BR 475' ],
+	'IC2.TWIN' => ['IC 2 Twindexx'],
+	'IC2.KISS' => ['IC 2 KISS'],
+);
+
+my %power_desc = (
+	90 => 'mit sonstigem Antrieb',
+	91 => 'mit elektrischer Lokomotive',
+	92 => 'mit Diesellokomotive',
+	93 => 'Hochgeschwindigkeitszug',
+	94 => 'Elektrischer Triebzug',
+	95 => 'Diesel-Triebzug',
+	96 => 'mit speziellen Beiwagen',
+	97 => 'mit elektrischer Rangierlok',
+	98 => 'mit Diesel-Rangierlok',
+	99 => 'Sonderfahrzeug',
+);
+
 sub new {
 	my ( $class, %opt ) = @_;
 
@@ -298,6 +357,46 @@ sub train_powertype {
 	return $self->{train_powertype} = $likelihood[0];
 }
 
+sub train_desc {
+	my ($self) = @_;
+
+	my $powertype = $self->train_powertype;
+	my @model     = $self->train_model;
+
+	my $ret = q{};
+
+	if (@model) {
+		$ret .= $model[0];
+	}
+
+	if ( $powertype and $power_desc{$powertype} ) {
+		if ( not $ret and $power_desc{$powertype} =~ m{^mit} ) {
+			$ret = "Zug";
+		}
+		$ret .= " $power_desc{$powertype}";
+	}
+
+	if ( @model > 1 ) {
+		$ret .= " ($model[1])";
+	}
+
+	return $ret;
+}
+
+sub train_model {
+	my ($self) = @_;
+
+	my $subtype = $self->train_subtype;
+
+	if ( $subtype and $model_name{$subtype} ) {
+		return @{ $model_name{$subtype} };
+	}
+	if ($subtype) {
+		return $subtype;
+	}
+	return;
+}
+
 sub train_subtype {
 	my ($self) = @_;
 
@@ -305,75 +404,78 @@ sub train_subtype {
 		return $self->{train_subtype};
 	}
 
-	my @wagons          = $self->wagons;
-	my $with_restaurant = 0;
+	my @wagons = $self->wagons;
 
 	my %ml = (
-		'ICE 1'        => 0,
-		'ICE 2'        => 0,
-		'ICE 3 403.1'  => 0,
-		'ICE 3 403.2'  => 0,
-		'ICE 3 406'    => 0,
-		'ICE 3 Velaro' => 0,
-		'ICE 4'        => 0,
-		'ICE T 411.1'  => 0,
-		'ICE T 411.2'  => 0,
-		'ICE T 415'    => 0,
-		'IC2 Twindexx' => 0,
-		'IC2 KISS'     => 0,
+		'401'      => 0,
+		'402'      => 0,
+		'403.S1'   => 0,
+		'403.S2'   => 0,
+		'403.R'    => 0,
+		'406'      => 0,
+		'407'      => 0,
+		'411.S1'   => 0,
+		'411.S2'   => 0,
+		'412'      => 0,
+		'415'      => 0,
+		'475'      => 0,
+		'IC2.TWIN' => 0,
+		'IC2.KISS' => 0,
 	);
 
 	for my $wagon (@wagons) {
 		if ( not $wagon->model ) {
 			next;
 		}
-		if ( $wagon->type eq 'WRmz' ) {
-			$with_restaurant = 1;
-		}
 		if ( $wagon->model == 401
 			or ( $wagon->model >= 801 and $wagon->model <= 804 ) )
 		{
-			$ml{'ICE 1'}++;
+			$ml{'401'}++;
 		}
 		elsif ( $wagon->model == 402
 			or ( $wagon->model >= 805 and $wagon->model <= 808 ) )
 		{
-			$ml{'ICE 2'}++;
+			$ml{'402'}++;
+		}
+		elsif ( $wagon->model == 403
+			and $is_redesign{ substr( $wagon->uic_id, 9, 2 ) } )
+		{
+			$ml{'403.R'}++;
 		}
 		elsif ( $wagon->model == 403 and substr( $wagon->uic_id, 9, 2 ) <= 37 )
 		{
-			$ml{'ICE 3 403.1'}++;
+			$ml{'403.S1'}++;
 		}
 		elsif ( $wagon->model == 403 and substr( $wagon->uic_id, 9, 2 ) > 37 ) {
-			$ml{'ICE 3 403.2'}++;
+			$ml{'403.S2'}++;
 		}
 		elsif ( $wagon->model == 406 ) {
-			$ml{'ICE 3 406'}++;
+			$ml{'406'}++;
 		}
 		elsif ( $wagon->model == 407 ) {
-			$ml{'ICE 3 Velaro'}++;
+			$ml{'407'}++;
 		}
 		elsif ( $wagon->model == 412 or $wagon->model == 812 ) {
-			$ml{'ICE 4'}++;
+			$ml{'412'}++;
 		}
 		elsif ( $wagon->model == 411 and substr( $wagon->uic_id, 9, 2 ) <= 32 )
 		{
-			$ml{'ICE T 411.1'}++;
+			$ml{'411.S1'}++;
 		}
 		elsif ( $wagon->model == 411 and substr( $wagon->uic_id, 9, 2 ) > 32 ) {
-			$ml{'ICE T 411.2'}++;
+			$ml{'411.S2'}++;
 		}
 		elsif ( $wagon->model == 415 ) {
-			$ml{'ICE T 415'}++;
+			$ml{'415'}++;
 		}
 		elsif ( $wagon->model == 475 ) {
-			$ml{'TGV'}++;
+			$ml{'475'}++;
 		}
 		elsif ( $self->train_type eq 'IC' and $wagon->model == 110 ) {
-			$ml{'IC2 KISS'}++;
+			$ml{'IC2.KISS'}++;
 		}
 		elsif ( $self->train_type eq 'IC' and $wagon->is_dosto ) {
-			$ml{'IC2 Twindexx'}++;
+			$ml{'IC2.TWIN'}++;
 		}
 	}
 
@@ -387,9 +489,6 @@ sub train_subtype {
 
 	$self->{train_subtype} = $likelihood[0];
 
-	if ( $self->{train_subtype} =~ m{ICE 3 4} and $with_restaurant ) {
-		$self->{train_subtype} = 'ICE 3 Redesign';
-	}
 	return $self->{train_subtype};
 }
 
@@ -601,6 +700,17 @@ Returns the name of the requested station.
 
 Returns the international id (UIC ID / IBNR) of the requested station.
 
+=item $wr->train_desc
+
+Returns a string describing the rolling stock used for this train based on
+model and locomotive (if present), e.g. "ICE 4 Hochgeschwindigkeitszug",
+"IC 2 Twindexx mit elektrischer Lokomotive", or "Diesel-Triebzug".
+
+=item $wr->train_model
+
+Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
+or "IC2 KISS".
+
 =item $wr->train_numbers
 
 Returns the list of train numbers for this departure. In most cases, this is
@@ -613,8 +723,8 @@ Returns a string describing the train type, e.g. "ICE" or "IC".
 
 =item $wr->train_subtype
 
-Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
-or "IC2 KISS".
+Returns a string describing the rolling stock model used for this train, e.g.
+"412" (model 412 aka ICE 4) or "411.S2" (model 411 aka ICE T, series 2).
 
 =item $wr->wagons
 
