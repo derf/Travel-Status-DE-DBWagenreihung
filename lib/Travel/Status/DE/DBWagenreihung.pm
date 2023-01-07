@@ -44,17 +44,18 @@ my %is_redesign = (
 my %model_name = (
 	'401'      => ['ICE 1'],
 	'402'      => ['ICE 2'],
-	'403.S1'   => [ 'ICE 3', 'BR 403, 1. Serie' ],
-	'403.S2'   => [ 'ICE 3', 'BR 403, 2. Serie' ],
-	'403.R'    => [ 'ICE 3', 'BR 403 Redesign' ],
-	'406'      => [ 'ICE 3', 'BR 406' ],
-	'406.R'    => [ 'ICE 3', 'BR 406 Redesign' ],
+	'403.S1'   => [ 'ICE 3',        'BR 403, 1. Serie' ],
+	'403.S2'   => [ 'ICE 3',        'BR 403, 2. Serie' ],
+	'403.R'    => [ 'ICE 3',        'BR 403 Redesign' ],
+	'406'      => [ 'ICE 3',        'BR 406' ],
+	'406.R'    => [ 'ICE 3',        'BR 406 Redesign' ],
 	'407'      => [ 'ICE 3 Velaro', 'BR 407' ],
-	'411.S1'   => [ 'ICE T', 'BR 411, 1. Serie' ],
-	'411.S2'   => [ 'ICE T', 'BR 411, 2. Serie' ],
+	'408'      => [ 'ICE 3neo',     'BR 408' ],
+	'411.S1'   => [ 'ICE T',        'BR 411, 1. Serie' ],
+	'411.S2'   => [ 'ICE T',        'BR 411, 2. Serie' ],
 	'412'      => ['ICE 4'],
 	'415'      => [ 'ICE T', 'BR 415' ],
-	'475'      => [ 'TGV', 'BR 475' ],
+	'475'      => [ 'TGV',   'BR 475' ],
 	'IC2.TWIN' => ['IC 2 Twindexx'],
 	'IC2.KISS' => ['IC 2 KISS'],
 );
@@ -453,6 +454,7 @@ sub train_subtype {
 		'403.R'    => 0,
 		'406'      => 0,
 		'407'      => 0,
+		'408'      => 0,
 		'411.S1'   => 0,
 		'411.S2'   => 0,
 		'412'      => 0,
@@ -493,6 +495,9 @@ sub train_subtype {
 		}
 		elsif ( $wagon->model == 407 ) {
 			$ml{'407'}++;
+		}
+		elsif ( $wagon->model == 408 ) {
+			$ml{'408'}++;
 		}
 		elsif ( $wagon->model == 412 or $wagon->model == 812 ) {
 			$ml{'412'}++;
