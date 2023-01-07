@@ -325,8 +325,7 @@ sub train_no {
 	return $self->{data}{istformation}{zugnummer};
 }
 
-# TODO rename to wagongrop_powertype
-sub train_powertype {
+sub wagongroup_powertype {
 	my ( $self, @wagons ) = @_;
 
 	if ( not @wagons ) {
@@ -364,26 +363,9 @@ sub train_descriptions {
 	my @ret;
 
 	for my $wagons ( @{ $self->{wagongroups} } ) {
-		my $powertype = $self->train_powertype( @{$wagons} );
-		my @model     = $self->train_model( @{$wagons} );
-		my $desc      = q{};
-
+		my $desc     = $self->wagongroup_description( @{$wagons} );
 		my @sections = uniq map { $_->section } @{$wagons};
 
-		if (@model) {
-			$desc .= $model[0];
-		}
-
-		if ( $powertype and $power_desc{$powertype} ) {
-			if ( not $desc and $power_desc{$powertype} =~ m{^mit} ) {
-				$desc = "Zug";
-			}
-			$desc .= " $power_desc{$powertype}";
-		}
-
-		if ( @model > 1 ) {
-			$desc .= " ($model[1])";
-		}
 		push(
 			@ret,
 			{
@@ -396,12 +378,11 @@ sub train_descriptions {
 	return @ret;
 }
 
-# TODO rename to wagongroup_desc
-sub train_desc {
-	my ($self) = @_;
+sub wagongroup_description {
+	my ( $self, @wagons ) = @_;
 
-	my $powertype = $self->train_powertype;
-	my @model     = $self->train_model;
+	my $powertype = $self->wagongroup_powertype(@wagons);
+	my @model     = $self->wagongroup_model(@wagons);
 
 	my $ret = q{};
 
@@ -423,11 +404,10 @@ sub train_desc {
 	return $ret;
 }
 
-# TODO rename to wagongroup_model
-sub train_model {
+sub wagongroup_model {
 	my ( $self, @wagons ) = @_;
 
-	my $subtype = $self->train_subtype(@wagons);
+	my $subtype = $self->wagongroup_subtype(@wagons);
 
 	if ( $subtype and $model_name{$subtype} ) {
 		return @{ $model_name{$subtype} };
@@ -438,8 +418,7 @@ sub train_model {
 	return;
 }
 
-# TODO rename to wagongroup_subtype
-sub train_subtype {
+sub wagongroup_subtype {
 	my ( $self, @wagons ) = @_;
 
 	if ( not @wagons ) {
@@ -574,7 +553,7 @@ sub wagons {
 	}
 
 	for my $group (@wagon_groups) {
-		my $tt = $self->train_subtype( @{$group} );
+		my $tt = $self->wagongroup_subtype( @{$group} );
 		if ($tt) {
 			for my $wagon ( @{$group} ) {
 				$wagon->set_traintype($tt);
@@ -755,13 +734,13 @@ on model and locomotive (if present). Each hash contains the keys B<text>
 (textual representation, see C<< $wr->train_desc >>) and B<sections>
 (arrayref of corresponding sections).
 
-=item $wr->train_desc
+=item $wr->wagongroup_description
 
 Returns a string describing the rolling stock used for this train based on
 model and locomotive (if present), e.g. "ICE 4 Hochgeschwindigkeitszug",
 "IC 2 Twindexx mit elektrischer Lokomotive", or "Diesel-Triebzug".
 
-=item $wr->train_model
+=item $wr->wagongroup_model
 
 Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
 or "IC2 KISS".
@@ -776,7 +755,7 @@ different numbers), it contains one element for each wing.
 
 Returns a string describing the train type, e.g. "ICE" or "IC".
 
-=item $wr->train_subtype
+=item $wr->wagongroup_subtype
 
 Returns a string describing the rolling stock model used for this train, e.g.
 "412" (model 412 aka ICE 4) or "411.S2" (model 411 aka ICE T, series 2).
