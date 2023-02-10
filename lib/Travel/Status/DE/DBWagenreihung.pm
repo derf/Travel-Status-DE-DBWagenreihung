@@ -86,7 +86,7 @@ sub new {
 
 	my $self = {
 		api_base => $opt{api_base}
-		  // 'https://www.apps-bahn.de/wr/wagenreihung/1.0',
+		  // 'https://ist-wr.noncd.db.de/wagenreihung/1.0',
 		developer_mode => $opt{developer_mode},
 		cache          => $opt{cache},
 		departure      => $opt{departure},
