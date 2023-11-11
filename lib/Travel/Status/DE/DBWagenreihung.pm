@@ -787,7 +787,7 @@ L<https://github.com/derf/Travel-Status-DE-DBWagenreihung>
 
 =head1 AUTHOR
 
-Copyright (C) 2018-2019 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+Copyright (C) 2018-2019 by Birte Kristina Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 
