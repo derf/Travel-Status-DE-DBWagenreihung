@@ -58,13 +58,15 @@ my %model_name = (
 	'422'      => ['BR 422'],
 	'423'      => ['BR 423'],
 	'425'      => ['BR 425'],
-	'429'      => [ 'FLIRT',          'BR 429' ],
+	'429'      => [ 'FLIRT', 'BR 429' ],
+	'430'      => ['BR 430'],
 	'440'      => [ 'Continental',    'BR 440' ],
 	'442'      => [ 'Talent 2',       'BR 442' ],
 	'445'      => [ 'Twindexx Vario', 'BR 445' ],
 	'446'      => [ 'Twindexx Vario', 'BR 446' ],
 	'463'      => [ 'Mireo',          'BR 463' ],
 	'475'      => [ 'TGV',            'BR 475' ],
+	'612'      => [ 'RegioSwinger',   'BR 612' ],
 	'620'      => [ 'LINT 81',        'BR 620' ],
 	'622'      => [ 'LINT 54',        'BR 622' ],
 	'640'      => [ 'LINT 27',        'BR 640' ],
@@ -467,12 +469,14 @@ sub wagongroup_subtype {
 		'423'      => 0,
 		'425'      => 0,
 		'429'      => 0,
+		'430'      => 0,
 		'440'      => 0,
 		'442'      => 0,
 		'445'      => 0,
 		'446'      => 0,
 		'463'      => 0,
 		'475'      => 0,
+		'612'      => 0,
 		'620'      => 0,
 		'622'      => 0,
 		'640'      => 0,
@@ -541,6 +545,9 @@ sub wagongroup_subtype {
 		elsif ( $wagon->model == 429 or $wagon->model == 829 ) {
 			$ml{'429'}++;
 		}
+		elsif ( $wagon->model == 430 or $wagon->model == 431 ) {
+			$ml{'430'}++;
+		}
 		elsif ($wagon->model == 440
 			or $wagon->model == 441
 			or $wagon->model == 841 )
@@ -565,6 +572,9 @@ sub wagongroup_subtype {
 		}
 		elsif ( $wagon->model == 475 ) {
 			$ml{'475'}++;
+		}
+		elsif ( $wagon->model == 612 ) {
+			$ml{'612'}++;
 		}
 		elsif ( $wagon->model == 620 or $wagon->model == 621 ) {
 			$ml{'620'}++;
