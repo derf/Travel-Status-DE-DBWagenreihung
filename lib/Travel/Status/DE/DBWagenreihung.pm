@@ -56,9 +56,19 @@ my %model_name = (
 	'412'      => ['ICE 4'],
 	'415'      => [ 'ICE T', 'BR 415' ],
 	'422'      => ['BR 422'],
-	'429'      => [ 'FLIRT',               'BR 429' ],
-	'440'      => [ 'Coradia Continental', 'BR 440' ],
-	'475'      => [ 'TGV',                 'BR 475' ],
+	'423'      => ['BR 423'],
+	'425'      => ['BR 425'],
+	'429'      => [ 'FLIRT',          'BR 429' ],
+	'440'      => [ 'Continental',    'BR 440' ],
+	'442'      => [ 'Talent 2',       'BR 442' ],
+	'445'      => [ 'Twindexx Vario', 'BR 445' ],
+	'446'      => [ 'Twindexx Vario', 'BR 446' ],
+	'463'      => [ 'Mireo',          'BR 463' ],
+	'475'      => [ 'TGV',            'BR 475' ],
+	'620'      => [ 'LINT 81',        'BR 620' ],
+	'622'      => [ 'LINT 54',        'BR 622' ],
+	'640'      => [ 'LINT 27',        'BR 640' ],
+	'648'      => [ 'LINT 41',        'BR 648' ],
 	'IC2.TWIN' => ['IC 2 Twindexx'],
 	'IC2.KISS' => ['IC 2 KISS'],
 );
@@ -454,9 +464,19 @@ sub wagongroup_subtype {
 		'412'      => 0,
 		'415'      => 0,
 		'422'      => 0,
+		'423'      => 0,
+		'425'      => 0,
 		'429'      => 0,
 		'440'      => 0,
+		'442'      => 0,
+		'445'      => 0,
+		'446'      => 0,
+		'463'      => 0,
 		'475'      => 0,
+		'620'      => 0,
+		'622'      => 0,
+		'640'      => 0,
+		'648'      => 0,
 		'IC2.TWIN' => 0,
 		'IC2.KISS' => 0,
 	);
@@ -512,6 +532,12 @@ sub wagongroup_subtype {
 		elsif ( $wagon->model == 422 or $wagon->model == 432 ) {
 			$ml{'422'}++;
 		}
+		elsif ( $wagon->model == 423 or $wagon->model == 433 ) {
+			$ml{'423'}++;
+		}
+		elsif ( $wagon->model == 425 or $wagon->model == 435 ) {
+			$ml{'425'}++;
+		}
 		elsif ( $wagon->model == 429 or $wagon->model == 829 ) {
 			$ml{'429'}++;
 		}
@@ -521,8 +547,36 @@ sub wagongroup_subtype {
 		{
 			$ml{'440'}++;
 		}
+		elsif ($wagon->model == 442
+			or $wagon->model == 443 )
+		{
+			$ml{'442'}++;
+		}
+		elsif ($wagon->model == 463
+			or $wagon->model == 863 )
+		{
+			$ml{'463'}++;
+		}
+		elsif ( $wagon->model == 445 ) {
+			$ml{'445'}++;
+		}
+		elsif ( $wagon->model == 446 ) {
+			$ml{'446'}++;
+		}
 		elsif ( $wagon->model == 475 ) {
 			$ml{'475'}++;
+		}
+		elsif ( $wagon->model == 620 or $wagon->model == 621 ) {
+			$ml{'620'}++;
+		}
+		elsif ( $wagon->model == 622 ) {
+			$ml{'622'}++;
+		}
+		elsif ( $wagon->model == 640 ) {
+			$ml{'640'}++;
+		}
+		elsif ( $wagon->model == 648 ) {
+			$ml{'648'}++;
 		}
 		elsif ( $self->train_type eq 'IC' and $wagon->model == 110 ) {
 			$ml{'IC2.KISS'}++;
