@@ -77,6 +77,7 @@ my %model_name = (
 	'632'      => [ 'Link II',        'BR 632' ],
 	'633'      => [ 'Link III',       'BR 633' ],
 	'640'      => [ 'LINT 27',        'BR 640' ],
+	'643'      => [ 'TALENT',         'BR 643' ],
 	'648'      => [ 'LINT 41',        'BR 648' ],
 	'IC2.TWIN' => ['IC 2 Twindexx'],
 	'IC2.KISS' => ['IC 2 KISS'],
@@ -493,6 +494,7 @@ sub wagongroup_subtype {
 		'632'      => 0,
 		'633'      => 0,
 		'640'      => 0,
+		'643'      => 0,
 		'648'      => 0,
 		'IC2.TWIN' => 0,
 		'IC2.KISS' => 0,
@@ -612,6 +614,9 @@ sub wagongroup_subtype {
 		}
 		elsif ( $wagon->model == 640 ) {
 			$ml{'640'}++;
+		}
+		elsif ( $wagon->model == 643 or $wagon->model == 943 ) {
+			$ml{'643'}++;
 		}
 		elsif ( $wagon->model == 648 ) {
 			$ml{'648'}++;
