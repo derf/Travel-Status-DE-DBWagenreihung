@@ -73,6 +73,9 @@ my %model_name = (
 	'612'      => [ 'RegioSwinger',   'BR 612' ],
 	'620'      => [ 'LINT 81',        'BR 620' ],
 	'622'      => [ 'LINT 54',        'BR 622' ],
+	'631'      => [ 'Link I',         'BR 631' ],
+	'632'      => [ 'Link II',        'BR 632' ],
+	'633'      => [ 'Link III',       'BR 633' ],
 	'640'      => [ 'LINT 27',        'BR 640' ],
 	'648'      => [ 'LINT 41',        'BR 648' ],
 	'IC2.TWIN' => ['IC 2 Twindexx'],
@@ -486,6 +489,9 @@ sub wagongroup_subtype {
 		'612'      => 0,
 		'620'      => 0,
 		'622'      => 0,
+		'631'      => 0,
+		'632'      => 0,
+		'633'      => 0,
 		'640'      => 0,
 		'648'      => 0,
 		'IC2.TWIN' => 0,
@@ -594,6 +600,15 @@ sub wagongroup_subtype {
 		}
 		elsif ( $wagon->model == 622 ) {
 			$ml{'622'}++;
+		}
+		elsif ( $wagon->model == 631 ) {
+			$ml{'631'}++;
+		}
+		elsif ( $wagon->model == 632 ) {
+			$ml{'632'}++;
+		}
+		elsif ( $wagon->model == 633 ) {
+			$ml{'633'}++;
 		}
 		elsif ( $wagon->model == 640 ) {
 			$ml{'640'}++;
