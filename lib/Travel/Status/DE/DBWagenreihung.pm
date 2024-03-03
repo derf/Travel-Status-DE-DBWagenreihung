@@ -588,7 +588,7 @@ sub wagongroup_subtype {
 
 	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
 
-	if ( $ml{ $likelihood[0] } <= 2 ) {
+	if ( $ml{ $likelihood[0] } < 2 ) {
 
 		# inconclusive
 		return undef;
