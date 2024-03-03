@@ -3,6 +3,7 @@ package Travel::Status::DE::DBWagenreihung;
 use strict;
 use warnings;
 use 5.020;
+use utf8;
 
 our $VERSION = '0.09';
 
@@ -42,6 +43,7 @@ my %is_redesign = (
 );
 
 my %model_name = (
+	'011'      => [ 'ICE T', 'ÖBB 4011' ],
 	'401'      => ['ICE 1'],
 	'402'      => ['ICE 2'],
 	'403.S1'   => [ 'ICE 3',        'BR 403, 1. Serie' ],
@@ -453,6 +455,7 @@ sub wagongroup_subtype {
 	}
 
 	my %ml = (
+		'011'      => 0,
 		'401'      => 0,
 		'402'      => 0,
 		'403.S1'   => 0,
@@ -593,6 +596,9 @@ sub wagongroup_subtype {
 		}
 		elsif ( $self->train_type eq 'IC' and $wagon->is_dosto ) {
 			$ml{'IC2.TWIN'}++;
+		}
+		elsif ( substr( $wagon->uic_id, 4, 4 ) eq '4011' ) {
+			$ml{'011'}++;
 		}
 	}
 
