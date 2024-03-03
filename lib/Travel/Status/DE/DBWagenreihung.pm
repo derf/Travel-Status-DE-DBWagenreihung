@@ -363,22 +363,31 @@ sub wagongroup_powertype {
 sub train_descriptions {
 	my ($self) = @_;
 
-	my @ret;
+	if ( exists $self->{train_descriptions} ) {
+		return @{ $self->{train_descriptions} };
+	}
+
+	if ( not exists $self->{wagons} ) {
+
+		# wagongroups are set while parsong wagons
+		$self->wagons;
+	}
 
 	for my $wagons ( @{ $self->{wagongroups} } ) {
-		my $desc     = $self->wagongroup_description( @{$wagons} );
+		my ( $short, $desc ) = $self->wagongroup_description( @{$wagons} );
 		my @sections = uniq map { $_->section } @{$wagons};
 
 		push(
-			@ret,
+			@{ $self->{train_descriptions} },
 			{
 				sections => [@sections],
+				short    => $short,
 				text     => $desc,
 			}
 		);
 	}
 
-	return @ret;
+	return @{ $self->{train_descriptions} };
 }
 
 sub wagongroup_description {
@@ -387,9 +396,11 @@ sub wagongroup_description {
 	my $powertype = $self->wagongroup_powertype(@wagons);
 	my @model     = $self->wagongroup_model(@wagons);
 
+	my $short;
 	my $ret = q{};
 
 	if (@model) {
+		$short = $model[0];
 		$ret .= $model[0];
 	}
 
@@ -398,13 +409,14 @@ sub wagongroup_description {
 			$ret = "Zug";
 		}
 		$ret .= " $power_desc{$powertype}";
+		$short //= $ret;
 	}
 
 	if ( @model > 1 ) {
 		$ret .= " ($model[1])";
 	}
 
-	return $ret;
+	return ( $short, $ret );
 }
 
 sub wagongroup_model {
@@ -754,8 +766,9 @@ on model and locomotive (if present). Each hash contains the keys B<text>
 
 =item $wr->wagongroup_description
 
-Returns a string describing the rolling stock used for this train based on
-model and locomotive (if present), e.g. "ICE 4 Hochgeschwindigkeitszug",
+Returns two strings describing the rolling stock used for this train based on
+model and locomotive (if present). The first one tries to be conscise (e.g.
+"ICE 4"). The second is more detailed, e.g. "ICE 4 Hochgeschwindigkeitszug",
 "IC 2 Twindexx mit elektrischer Lokomotive", or "Diesel-Triebzug".
 
 =item $wr->wagongroup_model
