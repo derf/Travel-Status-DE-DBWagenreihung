@@ -694,11 +694,12 @@ sub wagons {
 		} @{ $self->{wagons} };
 	}
 
-	for my $group (@wagon_groups) {
-		my $tt = $self->wagongroup_subtype( @{$group} );
+	for my $i ( 0 .. $#wagon_groups ) {
+		my $group = $wagon_groups[$i];
+		my $tt    = $self->wagongroup_subtype( @{$group} );
 		if ($tt) {
 			for my $wagon ( @{$group} ) {
-				$wagon->set_traintype($tt);
+				$wagon->set_traintype( $i, $tt );
 			}
 		}
 	}
