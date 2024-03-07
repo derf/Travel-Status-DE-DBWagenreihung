@@ -432,6 +432,8 @@ sub wagongroup_description {
 		}
 		$ret .= " $power_desc{$powertype}";
 		$short //= $ret;
+		$short =~ s{elektrischer }{E-};
+		$short =~ s{[Ll]\Kokomotive}{ok};
 	}
 
 	if ( @model > 1 ) {
