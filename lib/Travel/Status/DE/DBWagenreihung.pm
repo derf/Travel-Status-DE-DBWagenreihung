@@ -648,9 +648,9 @@ sub wagongroup_subtype {
 
 	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
 
-	if ( $ml{ $likelihood[0] } < 2 ) {
-
-		# inconclusive
+	# Less than two wagons are generally inconclusive.
+	# Exception: BR 631 (Link I) only has a single wagon
+	if ( $ml{ $likelihood[0] } < 2 and $likelihood[0] ne '631' ) {
 		return undef;
 	}
 
