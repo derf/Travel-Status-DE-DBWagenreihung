@@ -116,6 +116,10 @@ for my $wagon ( $wr->wagons ) {
 
 	my $wagon_desc = $wagon->number || '?';
 
+	if ( $wagon->is_closed ) {
+		$wagon_desc = 'X';
+	}
+
 	if ( $wagon->is_locomotive or $wagon->is_powercar ) {
 		$wagon_desc = ' ■ ';
 	}
@@ -150,8 +154,8 @@ say "";
 for my $wagon ( $wr->wagons ) {
 	printf(
 		"%3s: %3s %10s  %s\n",
-		$wagon->number || '?',
-		$wagon->model  || '???',
+		$wagon->is_closed ? 'X' : ( $wagon->number || '?' ),
+		$wagon->model || '???',
 		$wagon->type, join( q{  }, $wagon->attributes )
 	);
 }
