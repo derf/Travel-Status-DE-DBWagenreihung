@@ -117,7 +117,6 @@ sub new {
 		departure      => $opt{departure},
 		from_json      => $opt{from_json},
 		json           => JSON->new,
-		serializable   => $opt{serializable},
 		train_number   => $opt{train_number},
 		user_agent     => $opt{user_agent},
 	};
