@@ -183,6 +183,25 @@ sub errstr {
 	return $self->{errstr};
 }
 
+sub TO_JSON {
+	my ($self) = @_;
+
+	# ensure that all objects are available
+	$self->direction;
+	$self->origins;
+	$self->destinations;
+	$self->train_numbers;
+	$self->train_descriptions;
+	$self->wagons;
+	$self->{platform} = $self->platform;
+
+	my %copy = %{$self};
+
+	delete $copy{from_json};
+
+	return {%copy};
+}
+
 sub direction {
 	my ($self) = @_;
 
