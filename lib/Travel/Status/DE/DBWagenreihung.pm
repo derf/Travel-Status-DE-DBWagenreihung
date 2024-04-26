@@ -192,6 +192,7 @@ sub TO_JSON {
 	$self->destinations;
 	$self->train_numbers;
 	$self->train_descriptions;
+	$self->sections;
 	$self->wagons;
 	$self->{platform} = $self->platform;
 
