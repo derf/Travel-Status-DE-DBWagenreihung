@@ -82,7 +82,7 @@ printf(
 	),
 );
 
-printf( "%s Gleis %s\n\n", $wr->station_name, $wr->platform );
+printf( "%s Gleis %s\n\n", $wr->station->{name}, $wr->platform );
 
 for my $section ( $wr->sections ) {
 	my $section_length = $section->length_percent;

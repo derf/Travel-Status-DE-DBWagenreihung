@@ -334,24 +334,6 @@ sub sections {
 	return @{ $self->{sections} // [] };
 }
 
-sub station_ds100 {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{halt}{rl100};
-}
-
-sub station_name {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{halt}{bahnhofsname};
-}
-
-sub station_uic {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{halt}{evanummer};
-}
-
 sub train_numbers {
 	my ($self) = @_;
 
@@ -882,17 +864,11 @@ Returns the platform name.
 Describes the sections of the platform this train will depart from.
 Returns a list of L<Travel::Status::DE::DBWagenreihung::Section> objects.
 
-=item $wr->station_ds100
+=item $wr->station
 
-Returns the DS100 identifier of the requested station.
-
-=item $wr->station_name
-
-Returns the name of the requested station.
-
-=item $wr->station_uic
-
-Returns the international id (UIC ID / IBNR) of the requested station.
+Returns a hashref describing the requested station. The hashref contains three
+entries: B<ds100> (DS100 / Ril100 identifier), B<eva> (EVA ID, related to but
+not necessarily identical with UIC station ID), and B<name> (station name).
 
 =item $wr->train_descriptions
 
