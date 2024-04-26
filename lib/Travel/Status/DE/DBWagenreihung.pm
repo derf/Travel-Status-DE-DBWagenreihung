@@ -5,7 +5,7 @@ use warnings;
 use 5.020;
 use utf8;
 
-our $VERSION = '0.12';
+use parent 'Class::Accessor';
 
 use Carp qw(cluck confess);
 use JSON;
@@ -13,6 +13,11 @@ use List::Util qw(uniq);
 use LWP::UserAgent;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
+
+our $VERSION = '0.12';
+
+Travel::Status::DE::DBWagenreihung->mk_ro_accessors(
+	qw(platform station train_no train_type));
 
 my %is_redesign = (
 	"02" => 1,
@@ -175,6 +180,23 @@ sub get_wagonorder {
 
 	$self->{data} = $json->{data};
 	$self->{meta} = $json->{meta};
+
+	return $self->parse_wagonorder;
+}
+
+sub parse_wagonorder {
+	my ($self) = @_;
+
+	$self->{platform} = $self->{data}{istformation}{halt}{gleisbezeichnung};
+
+	$self->{station} = {
+		ds100 => $self->{data}{istformation}{halt}{rl100},
+		eva   => $self->{data}{istformation}{halt}{evanummer},
+		name  => $self->{data}{istformation}{halt}{bahnhofsname},
+	};
+
+	$self->{train_type} = $self->{data}{istformation}{zuggattung};
+	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
 }
 
 sub errstr {
@@ -194,7 +216,6 @@ sub TO_JSON {
 	$self->train_descriptions;
 	$self->sections;
 	$self->wagons;
-	$self->{platform} = $self->platform;
 
 	my %copy = %{$self};
 
@@ -286,12 +307,6 @@ sub destinations {
 	return @destinations;
 }
 
-sub platform {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{halt}{gleisbezeichnung};
-}
-
 sub sections {
 	my ($self) = @_;
 
@@ -337,12 +352,6 @@ sub station_uic {
 	return $self->{data}{istformation}{halt}{evanummer};
 }
 
-sub train_type {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{zuggattung};
-}
-
 sub train_numbers {
 	my ($self) = @_;
 
@@ -361,12 +370,6 @@ sub train_numbers {
 	$self->{train_numbers} = \@numbers;
 
 	return @numbers;
-}
-
-sub train_no {
-	my ($self) = @_;
-
-	return $self->{data}{istformation}{zugnummer};
 }
 
 sub wagongroup_powertype {
