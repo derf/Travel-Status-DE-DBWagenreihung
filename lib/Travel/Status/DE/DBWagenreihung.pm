@@ -255,12 +255,19 @@ sub origins {
 	}
 
 	my @origins;
+	my %section;
 
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		push( @origins, $group->{startbetriebsstellename} );
+		my $origin   = $group->{startbetriebsstellename};
+		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
+		push( @{ $section{$origin} }, @sections );
+		push( @origins,               $origin );
 	}
 
 	@origins = uniq @origins;
+
+	@origins
+	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } } @origins;
 
 	$self->{origins} = \@origins;
 
@@ -805,13 +812,13 @@ Train number. Do not include the train type: Use "8" for "EC 8" or
 
 =item $wr->destinations
 
-Returns a list describing all final destinations of this train. In most
-cases, it contains one element, however, for trains consisting of multiple
-wings, it contains one element for each wing.
+Returns a list describing the destinations of this train's wagons. In most
+cases, it contains one element. For trains consisting of multiple wings or
+trains that switch locomotives along the way, it contains one element for each
+wing or other kind of wagon group.
 
-Each destination is a hash ref containing the destination B<name> and the
-corresponding platform I<sections> (at the moment, this is a list of section
-identifiers).
+Each destination is a hash ref containing its B<name> and the corresponding
+platform I<sections> (at the moment, this is a list of section identifiers).
 
 This function is subject to change.
 
@@ -828,11 +835,13 @@ Returns undef otherwise.
 
 =item $wr->origins
 
-Returns a list of stations this train originates from. In most cases, this is
-just one element; however, for trains consisting of multiple wings, it gives
-the origin of each wing unless they are identical.
+Returns a list describing the origins of this train's wagons. In most
+cases, it contains one element. For trains consisting of multiple wings or
+trains that switch locomotives along the way, it contains one element for each
+wing or other kind of wagon group.
 
-Each origin is a station name.
+Each origin is a hash ref containing its B<name> and the corresponding
+platform I<sections> (at the moment, this is a list of section identifiers).
 
 This function is subject to change.
 

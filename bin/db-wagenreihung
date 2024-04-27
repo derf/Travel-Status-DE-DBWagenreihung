@@ -73,7 +73,12 @@ my $wr = Travel::Status::DE::DBWagenreihung->new(
 printf(
 	"%s: %s → %s\n",
 	join( ' / ', map { $wr->train_type . ' ' . $_ } $wr->train_numbers ),
-	join( ' / ', $wr->origins ),
+	join(
+		' / ',
+		map {
+			sprintf( '%s (%s)', $_->{name}, join( q{}, @{ $_->{sections} } ) )
+		} $wr->origins
+	),
 	join(
 		' / ',
 		map {
