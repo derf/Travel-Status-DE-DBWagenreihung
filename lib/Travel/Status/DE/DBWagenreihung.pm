@@ -17,7 +17,7 @@ use Travel::Status::DE::DBWagenreihung::Wagon;
 our $VERSION = '0.12';
 
 Travel::Status::DE::DBWagenreihung->mk_ro_accessors(
-	qw(platform station train_no train_type));
+	qw(direction platform station train_no train_type));
 
 my %is_redesign = (
 	"02" => 1,
@@ -197,6 +197,8 @@ sub parse_wagonorder {
 
 	$self->{train_type} = $self->{data}{istformation}{zuggattung};
 	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
+
+	$self->parse_wagons;
 }
 
 sub errstr {
@@ -209,31 +211,17 @@ sub TO_JSON {
 	my ($self) = @_;
 
 	# ensure that all objects are available
-	$self->direction;
 	$self->origins;
 	$self->destinations;
 	$self->train_numbers;
 	$self->train_descriptions;
 	$self->sections;
-	$self->wagons;
 
 	my %copy = %{$self};
 
 	delete $copy{from_json};
 
 	return {%copy};
-}
-
-sub direction {
-	my ($self) = @_;
-
-	if ( not exists $self->{direction} ) {
-
-		# direction is set while parsing wagons
-		$self->wagons;
-	}
-
-	return $self->{direction};
 }
 
 sub has_bad_wagons {
@@ -391,12 +379,6 @@ sub train_descriptions {
 
 	if ( exists $self->{train_descriptions} ) {
 		return @{ $self->{train_descriptions} };
-	}
-
-	if ( not exists $self->{wagons} ) {
-
-		# wagongroups are set while parsong wagons
-		$self->wagons;
 	}
 
 	for my $wagons ( @{ $self->{wagongroups} } ) {
@@ -663,10 +645,11 @@ sub wagongroup_subtype {
 
 sub wagons {
 	my ($self) = @_;
+	return @{ $self->{wagons} // [] };
+}
 
-	if ( exists $self->{wagons} ) {
-		return @{ $self->{wagons} };
-	}
+sub parse_wagons {
+	my ($self) = @_;
 
 	my @wagon_groups;
 
@@ -711,8 +694,6 @@ sub wagons {
 	}
 
 	$self->{wagongroups} = [@wagon_groups];
-
-	return @{ $self->{wagons} // [] };
 }
 
 sub get_with_cache {
@@ -931,7 +912,7 @@ L<https://github.com/derf/Travel-Status-DE-DBWagenreihung>
 
 =head1 AUTHOR
 
-Copyright (C) 2018-2019 by Birte Kristina Friesel E<lt>derf@finalrewind.orgE<gt>
+Copyright (C) 2018-2024 by Birte Kristina Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 
