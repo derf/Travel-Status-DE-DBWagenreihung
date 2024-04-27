@@ -338,10 +338,8 @@ sub parse_wagons {
 	for my $i ( 0 .. $#wagon_groups ) {
 		my $group = $wagon_groups[$i];
 		my $tt    = $self->wagongroup_subtype( @{$group} );
-		if ($tt) {
-			for my $wagon ( @{$group} ) {
-				$wagon->set_traintype( $i, $tt );
-			}
+		for my $wagon ( @{$group} ) {
+			$wagon->set_traintype( $i, $tt );
 		}
 	}
 

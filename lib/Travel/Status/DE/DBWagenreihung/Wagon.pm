@@ -203,7 +203,12 @@ sub parse_type {
 sub set_traintype {
 	my ( $self, $group_index, $tt ) = @_;
 
-	$self->{group_index}   = $group_index;
+	$self->{group_index} = $group_index;
+
+	if ( not $tt ) {
+		return;
+	}
+
 	$self->{train_subtype} = $tt;
 
 	if ( not $self->{number} or not exists( $type_attributes{$tt} ) ) {
