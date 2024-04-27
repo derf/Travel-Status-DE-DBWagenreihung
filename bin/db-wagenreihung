@@ -106,7 +106,9 @@ for my $section ( $wr->sections ) {
 print "\n";
 
 my @start_percentages = map { $_->{position}{start_percent} } $wr->wagons;
-print ' ' x ( ( min @start_percentages ) - 1 );
+if ( my $min_percentage = min @start_percentages ) {
+	print ' ' x ( $min_percentage - 1 );
+}
 print $wr->direction == 100 ? '>' : '<';
 
 for my $wagon ( $wr->wagons ) {
