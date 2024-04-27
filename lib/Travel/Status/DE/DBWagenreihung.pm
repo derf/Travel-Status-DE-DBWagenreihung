@@ -717,8 +717,6 @@ sub TO_JSON {
 	my ($self) = @_;
 
 	# ensure that all objects are available
-	$self->origins;
-	$self->destinations;
 	$self->train_numbers;
 	$self->train_descriptions;
 	$self->sections;
