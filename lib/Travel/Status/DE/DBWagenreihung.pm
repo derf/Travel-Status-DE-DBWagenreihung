@@ -11,6 +11,7 @@ use Carp qw(cluck confess);
 use JSON;
 use List::Util qw(uniq);
 use LWP::UserAgent;
+use Travel::Status::DE::DBWagenreihung::Group;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
 
@@ -306,18 +307,25 @@ sub parse_wagons {
 	my @wagon_groups;
 
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		my @group;
+		my @group_wagons;
 		for my $wagon ( @{ $group->{allFahrzeug} } ) {
 			my $wagon_object
 			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon},
 				train_no => $group->{verkehrlichezugnummer} );
 			push( @{ $self->{wagons} }, $wagon_object );
-			push( @group,               $wagon_object );
+			push( @group_wagons,        $wagon_object );
 			if ( not $wagon_object->{position}{valid} ) {
 				$self->{has_bad_wagons} = 1;
 			}
 		}
-		push( @wagon_groups, [@group] );
+		my $group_obj = Travel::Status::DE::DBWagenreihung::Group->new(
+			id          => $group->{fahrzeuggruppebezeichnung},
+			train_no    => $group->{verkehrlichezugnummer},
+			origin      => $group->{startbetriebsstellename},
+			destination => $group->{zielbetriebsstellename},
+			wagons      => \@group_wagons,
+		);
+		push( @wagon_groups, $group_obj );
 	}
 	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
 		if ( $self->{wagons}[0]->{position}{start_percent}
@@ -333,14 +341,16 @@ sub parse_wagons {
 		@{ $self->{wagons} } = sort {
 			$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
 		} @{ $self->{wagons} };
+		for my $group (@wagon_groups) {
+			$group->sort_wagons;
+		}
 	}
 
 	for my $i ( 0 .. $#wagon_groups ) {
 		my $group = $wagon_groups[$i];
-		my $tt    = $self->wagongroup_subtype( @{$group} );
-		for my $wagon ( @{$group} ) {
-			$wagon->set_traintype( $i, $tt );
-		}
+		my $tt    = $self->wagongroup_subtype( $group->wagons );
+		$group->set_traintype( $i, $tt );
+		$group->{type} = $tt;
 	}
 
 	$self->{wagongroups} = [@wagon_groups];
@@ -401,9 +411,9 @@ sub train_descriptions {
 		return @{ $self->{train_descriptions} };
 	}
 
-	for my $wagons ( @{ $self->{wagongroups} } ) {
-		my ( $short, $desc ) = $self->wagongroup_description( @{$wagons} );
-		my @sections = uniq map { $_->section } @{$wagons};
+	for my $group ( @{ $self->{wagongroups} } ) {
+		my ( $short, $desc ) = $self->wagongroup_description( $group->wagons );
+		my @sections = uniq map { $_->section } $group->wagons;
 
 		push(
 			@{ $self->{train_descriptions} },
@@ -704,6 +714,11 @@ sub wagongroup_subtype {
 	}
 
 	return $likelihood[0];
+}
+
+sub groups {
+	my ($self) = @_;
+	return @{ $self->{wagongroups} // [] };
 }
 
 sub wagons {
