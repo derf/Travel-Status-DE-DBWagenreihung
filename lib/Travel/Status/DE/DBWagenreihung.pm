@@ -19,6 +19,8 @@ our $VERSION = '0.12';
 Travel::Status::DE::DBWagenreihung->mk_ro_accessors(
 	qw(direction platform station train_no train_type));
 
+# {{{ Rolling Stock Models
+
 my %is_redesign = (
 	"02" => 1,
 	"03" => 1,
@@ -103,6 +105,9 @@ my %power_desc = (
 	99 => 'Sonderfahrzeug',
 );
 
+# }}}
+# {{{ Constructors
+
 sub new {
 	my ( $class, %opt ) = @_;
 
@@ -184,6 +189,77 @@ sub get_wagonorder {
 	return $self->parse_wagonorder;
 }
 
+# }}}
+# {{{ Internal Helpers
+
+sub get_with_cache {
+	my ( $self, $cache, $url ) = @_;
+
+	if ( $self->{developer_mode} ) {
+		say "GET $url";
+	}
+
+	if ($cache) {
+		my $content = $cache->thaw($url);
+		if ($content) {
+			if ( $self->{developer_mode} ) {
+				say '  cache hit';
+			}
+			return ( ${$content}, undef );
+		}
+	}
+
+	if ( $self->{developer_mode} ) {
+		say '  cache miss';
+	}
+
+	my $ua  = $self->{user_agent};
+	my $res = $ua->get($url);
+
+	if ( $res->is_error ) {
+		return ( undef, $res->status_line );
+	}
+	my $content = $res->decoded_content;
+
+	if ($cache) {
+		$cache->freeze( $url, \$content );
+	}
+
+	return ( $content, undef );
+}
+
+sub wagongroup_powertype {
+	my ( $self, @wagons ) = @_;
+
+	if ( not @wagons ) {
+		@wagons = $self->wagons;
+	}
+
+	my %ml = map { $_ => 0 } ( 90 .. 99 );
+
+	for my $wagon (@wagons) {
+
+		if ( not $wagon->uic_id or length( $wagon->uic_id ) != 12 ) {
+			next;
+		}
+
+		my $wagon_type = substr( $wagon->uic_id, 0, 2 );
+		if ( $wagon_type < 90 ) {
+			next;
+		}
+
+		$ml{$wagon_type}++;
+	}
+
+	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
+
+	if ( $ml{ $likelihood[0] } == 0 ) {
+		return undef;
+	}
+
+	return $likelihood[0];
+}
+
 sub parse_wagonorder {
 	my ($self) = @_;
 
@@ -201,52 +277,6 @@ sub parse_wagonorder {
 	$self->parse_wagons;
 	$self->{origins}      = $self->parse_wings('startbetriebsstellename');
 	$self->{destinations} = $self->parse_wings('zielbetriebsstellename');
-}
-
-sub errstr {
-	my ($self) = @_;
-
-	return $self->{errstr};
-}
-
-sub TO_JSON {
-	my ($self) = @_;
-
-	# ensure that all objects are available
-	$self->origins;
-	$self->destinations;
-	$self->train_numbers;
-	$self->train_descriptions;
-	$self->sections;
-
-	my %copy = %{$self};
-
-	delete $copy{from_json};
-
-	return {%copy};
-}
-
-sub has_bad_wagons {
-	my ($self) = @_;
-
-	if ( defined $self->{has_bad_wagons} ) {
-		return $self->{has_bad_wagons};
-	}
-
-	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		for my $wagon ( @{ $group->{allFahrzeug} } ) {
-			my $pos = $wagon->{positionamhalt};
-			if (   $pos->{startprozent} eq ''
-				or $pos->{endeprozent} eq ''
-				or $pos->{startmeter} eq ''
-				or $pos->{endemeter} eq '' )
-			{
-				return $self->{has_bad_wagons} = 1;
-			}
-		}
-	}
-
-	return $self->{has_bad_wagons} = 0;
 }
 
 sub parse_wings {
@@ -268,6 +298,63 @@ sub parse_wings {
 	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } } @names;
 
 	return \@names;
+}
+
+sub parse_wagons {
+	my ($self) = @_;
+
+	my @wagon_groups;
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		my @group;
+		for my $wagon ( @{ $group->{allFahrzeug} } ) {
+			my $wagon_object
+			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon},
+				train_no => $group->{verkehrlichezugnummer} );
+			push( @{ $self->{wagons} }, $wagon_object );
+			push( @group,               $wagon_object );
+			if ( not $wagon_object->{position}{valid} ) {
+				$self->{has_bad_wagons} = 1;
+			}
+		}
+		push( @wagon_groups, [@group] );
+	}
+	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
+		if ( $self->{wagons}[0]->{position}{start_percent}
+			> $self->{wagons}[-1]->{position}{start_percent} )
+		{
+			$self->{direction} = 100;
+		}
+		else {
+			$self->{direction} = 0;
+		}
+	}
+	if ( not $self->has_bad_wagons ) {
+		@{ $self->{wagons} } = sort {
+			$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
+		} @{ $self->{wagons} };
+	}
+
+	for my $i ( 0 .. $#wagon_groups ) {
+		my $group = $wagon_groups[$i];
+		my $tt    = $self->wagongroup_subtype( @{$group} );
+		if ($tt) {
+			for my $wagon ( @{$group} ) {
+				$wagon->set_traintype( $i, $tt );
+			}
+		}
+	}
+
+	$self->{wagongroups} = [@wagon_groups];
+}
+
+# }}}
+# {{{ Public Functions
+
+sub errstr {
+	my ($self) = @_;
+
+	return $self->{errstr};
 }
 
 sub destinations {
@@ -309,58 +396,6 @@ sub sections {
 	return @{ $self->{sections} // [] };
 }
 
-sub train_numbers {
-	my ($self) = @_;
-
-	if ( exists $self->{train_numbers} ) {
-		return @{ $self->{train_numbers} };
-	}
-
-	my @numbers;
-
-	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		push( @numbers, $group->{verkehrlichezugnummer} );
-	}
-
-	@numbers = uniq @numbers;
-
-	$self->{train_numbers} = \@numbers;
-
-	return @numbers;
-}
-
-sub wagongroup_powertype {
-	my ( $self, @wagons ) = @_;
-
-	if ( not @wagons ) {
-		@wagons = $self->wagons;
-	}
-
-	my %ml = map { $_ => 0 } ( 90 .. 99 );
-
-	for my $wagon (@wagons) {
-
-		if ( not $wagon->uic_id or length( $wagon->uic_id ) != 12 ) {
-			next;
-		}
-
-		my $wagon_type = substr( $wagon->uic_id, 0, 2 );
-		if ( $wagon_type < 90 ) {
-			next;
-		}
-
-		$ml{$wagon_type}++;
-	}
-
-	my @likelihood = reverse sort { $ml{$a} <=> $ml{$b} } keys %ml;
-
-	if ( $ml{ $likelihood[0] } == 0 ) {
-		return undef;
-	}
-
-	return $likelihood[0];
-}
-
 sub train_descriptions {
 	my ($self) = @_;
 
@@ -383,6 +418,49 @@ sub train_descriptions {
 	}
 
 	return @{ $self->{train_descriptions} };
+}
+
+sub train_numbers {
+	my ($self) = @_;
+
+	if ( exists $self->{train_numbers} ) {
+		return @{ $self->{train_numbers} };
+	}
+
+	my @numbers;
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		push( @numbers, $group->{verkehrlichezugnummer} );
+	}
+
+	@numbers = uniq @numbers;
+
+	$self->{train_numbers} = \@numbers;
+
+	return @numbers;
+}
+
+sub has_bad_wagons {
+	my ($self) = @_;
+
+	if ( defined $self->{has_bad_wagons} ) {
+		return $self->{has_bad_wagons};
+	}
+
+	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
+		for my $wagon ( @{ $group->{allFahrzeug} } ) {
+			my $pos = $wagon->{positionamhalt};
+			if (   $pos->{startprozent} eq ''
+				or $pos->{endeprozent} eq ''
+				or $pos->{startmeter} eq ''
+				or $pos->{endemeter} eq '' )
+			{
+				return $self->{has_bad_wagons} = 1;
+			}
+		}
+	}
+
+	return $self->{has_bad_wagons} = 0;
 }
 
 sub wagongroup_description {
@@ -635,89 +713,24 @@ sub wagons {
 	return @{ $self->{wagons} // [] };
 }
 
-sub parse_wagons {
+sub TO_JSON {
 	my ($self) = @_;
 
-	my @wagon_groups;
+	# ensure that all objects are available
+	$self->origins;
+	$self->destinations;
+	$self->train_numbers;
+	$self->train_descriptions;
+	$self->sections;
 
-	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		my @group;
-		for my $wagon ( @{ $group->{allFahrzeug} } ) {
-			my $wagon_object
-			  = Travel::Status::DE::DBWagenreihung::Wagon->new( %{$wagon},
-				train_no => $group->{verkehrlichezugnummer} );
-			push( @{ $self->{wagons} }, $wagon_object );
-			push( @group,               $wagon_object );
-			if ( not $wagon_object->{position}{valid} ) {
-				$self->{has_bad_wagons} = 1;
-			}
-		}
-		push( @wagon_groups, [@group] );
-	}
-	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
-		if ( $self->{wagons}[0]->{position}{start_percent}
-			> $self->{wagons}[-1]->{position}{start_percent} )
-		{
-			$self->{direction} = 100;
-		}
-		else {
-			$self->{direction} = 0;
-		}
-	}
-	if ( not $self->has_bad_wagons ) {
-		@{ $self->{wagons} } = sort {
-			$a->{position}->{start_percent} <=> $b->{position}->{start_percent}
-		} @{ $self->{wagons} };
-	}
+	my %copy = %{$self};
 
-	for my $i ( 0 .. $#wagon_groups ) {
-		my $group = $wagon_groups[$i];
-		my $tt    = $self->wagongroup_subtype( @{$group} );
-		if ($tt) {
-			for my $wagon ( @{$group} ) {
-				$wagon->set_traintype( $i, $tt );
-			}
-		}
-	}
+	delete $copy{from_json};
 
-	$self->{wagongroups} = [@wagon_groups];
+	return {%copy};
 }
 
-sub get_with_cache {
-	my ( $self, $cache, $url ) = @_;
-
-	if ( $self->{developer_mode} ) {
-		say "GET $url";
-	}
-
-	if ($cache) {
-		my $content = $cache->thaw($url);
-		if ($content) {
-			if ( $self->{developer_mode} ) {
-				say '  cache hit';
-			}
-			return ( ${$content}, undef );
-		}
-	}
-
-	if ( $self->{developer_mode} ) {
-		say '  cache miss';
-	}
-
-	my $ua  = $self->{user_agent};
-	my $res = $ua->get($url);
-
-	if ( $res->is_error ) {
-		return ( undef, $res->status_line );
-	}
-	my $content = $res->decoded_content;
-
-	if ($cache) {
-		$cache->freeze( $url, \$content );
-	}
-
-	return ( $content, undef );
-}
+# }}}
 
 1;
 
