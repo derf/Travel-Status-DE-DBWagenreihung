@@ -199,6 +199,8 @@ sub parse_wagonorder {
 	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
 
 	$self->parse_wagons;
+	$self->{origins}      = $self->parse_wings('startbetriebsstellename');
+	$self->{destinations} = $self->parse_wings('zielbetriebsstellename');
 }
 
 sub errstr {
@@ -247,59 +249,37 @@ sub has_bad_wagons {
 	return $self->{has_bad_wagons} = 0;
 }
 
-sub origins {
-	my ($self) = @_;
+sub parse_wings {
+	my ( $self, $attr ) = @_;
 
-	if ( exists $self->{origins} ) {
-		return @{ $self->{origins} };
-	}
-
-	my @origins;
+	my @names;
 	my %section;
 
 	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		my $origin   = $group->{startbetriebsstellename};
+		my $name     = $group->{$attr};
 		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
-		push( @{ $section{$origin} }, @sections );
-		push( @origins,               $origin );
+		push( @{ $section{$name} }, @sections );
+		push( @names,               $name );
 	}
 
-	@origins = uniq @origins;
+	@names = uniq @names;
 
-	@origins
-	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } } @origins;
+	@names
+	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } } @names;
 
-	$self->{origins} = \@origins;
-
-	return @origins;
+	return \@names;
 }
 
 sub destinations {
 	my ($self) = @_;
 
-	if ( exists $self->{destinations} ) {
-		return @{ $self->{destinations} };
-	}
+	return @{ $self->{destinations} // [] };
+}
 
-	my @destinations;
-	my %section;
+sub origins {
+	my ($self) = @_;
 
-	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		my $destination = $group->{zielbetriebsstellename};
-		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
-		push( @{ $section{$destination} }, @sections );
-		push( @destinations,               $destination );
-	}
-
-	@destinations = uniq @destinations;
-
-	@destinations
-	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } }
-	  @destinations;
-
-	$self->{destinations} = \@destinations;
-
-	return @destinations;
+	return @{ $self->{origins} // [] };
 }
 
 sub sections {
