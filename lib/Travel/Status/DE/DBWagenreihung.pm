@@ -14,7 +14,7 @@ use LWP::UserAgent;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 Travel::Status::DE::DBWagenreihung->mk_ro_accessors(
 	qw(direction platform station train_no train_type));
@@ -753,7 +753,7 @@ Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 This is beta software. The API may change without notice.
 

@@ -1,4 +1,4 @@
-git HEAD
+Travel::Status::DE::DBWagenreihung 0.13 - Sat Apr 27 2024
 
     * DBWagenreihung: Add station accessor.
     * DBWagenreihung: Add TO_JSON function.
