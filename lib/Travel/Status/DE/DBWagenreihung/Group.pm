@@ -7,7 +7,7 @@ use utf8;
 
 use parent 'Class::Accessor';
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 Travel::Status::DE::DBWagenreihung::Group->mk_ro_accessors(
 	qw(id train_no type description desc_short origin destination has_sections)

@@ -15,7 +15,7 @@ use Travel::Status::DE::DBWagenreihung::Group;
 use Travel::Status::DE::DBWagenreihung::Section;
 use Travel::Status::DE::DBWagenreihung::Wagon;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 Travel::Status::DE::DBWagenreihung->mk_ro_accessors(
 	qw(direction platform station train_no train_type));
@@ -778,7 +778,7 @@ Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn carriage formati
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 This is beta software. The API may change without notice.
 
