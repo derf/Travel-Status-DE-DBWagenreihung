@@ -261,29 +261,6 @@ sub wagongroup_powertype {
 	return $likelihood[0];
 }
 
-sub parse_train_descriptions {
-	my ($self) = @_;
-
-	for my $group ( @{ $self->{wagongroups} } ) {
-		my ( $short, $desc ) = $self->wagongroup_description( $group->wagons );
-		my @sections = uniq map { $_->section } $group->wagons;
-
-		if ( @sections and length( join( q{}, @sections ) ) ) {
-			$group->set_sections(@sections);
-		}
-		$group->set_description( $desc, $short );
-
-		push(
-			@{ $self->{train_descriptions} },
-			{
-				sections => [@sections],
-				short    => $short,
-				text     => $desc,
-			}
-		);
-	}
-}
-
 sub parse_wagonorder {
 	my ($self) = @_;
 
@@ -299,7 +276,6 @@ sub parse_wagonorder {
 	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
 
 	$self->parse_wagons;
-	$self->parse_train_descriptions;
 	$self->{origins}      = $self->parse_wings('startbetriebsstellename');
 	$self->{destinations} = $self->parse_wings('zielbetriebsstellename');
 }
@@ -350,6 +326,14 @@ sub parse_wagons {
 			wagons      => \@group_wagons,
 		);
 		push( @wagon_groups, $group_obj );
+
+		my ( $short, $desc ) = $self->wagongroup_description( $group_obj->wagons );
+		my @sections = uniq map { $_->section } $group_obj->wagons;
+
+		if ( @sections and length( join( q{}, @sections ) ) ) {
+			$group_obj->set_sections(@sections);
+		}
+		$group_obj->set_description( $desc, $short );
 	}
 	if ( @{ $self->{wagons} // [] } > 1 and not $self->has_bad_wagons ) {
 		if ( $self->{wagons}[0]->{position}{start_percent}
@@ -426,11 +410,6 @@ sub sections {
 	}
 
 	return @{ $self->{sections} // [] };
-}
-
-sub train_descriptions {
-	my ($self) = @_;
-	return @{ $self->{train_descriptions} // [] };
 }
 
 sub train_numbers {
@@ -742,7 +721,6 @@ sub TO_JSON {
 
 	# ensure that all objects are available
 	$self->train_numbers;
-	$self->train_descriptions;
 	$self->sections;
 
 	my %copy = %{$self};
@@ -874,13 +852,6 @@ Returns a list of L<Travel::Status::DE::DBWagenreihung::Section> objects.
 Returns a hashref describing the requested station. The hashref contains three
 entries: B<ds100> (DS100 / Ril100 identifier), B<eva> (EVA ID, related to but
 not necessarily identical with UIC station ID), and B<name> (station name).
-
-=item $wr->train_descriptions
-
-Returns a list of hashes describing the rolling stock used for this train based
-on model and locomotive (if present). Each hash contains the keys B<text>
-(textual representation, see C<< $wr->train_desc >>) and B<sections>
-(arrayref of corresponding sections).
 
 =item $wr->wagongroup_description
 
