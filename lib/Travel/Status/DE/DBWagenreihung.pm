@@ -785,11 +785,12 @@ This is beta software. The API may change without notice.
 =head1 DESCRIPTION
 
 Travel:Status:DE::DBWagenreihung is an unofficial interface to the Deutsche
-Bahn carriage formation API at L<https://ist-wr.noncd.db.de/wagenreihung/1.0>.
-It returns station-specific carriage formations for a variety of trains in the
-rail network associated with Deutsche Bahn.  Data includes carriage positions
-on the platform, train type (e.g. ICE series), carriage-specific attributes
-such as first/second class, and the internal type and number of each carriage.
+Bahn carriage formation (API at L<https://ist-wr.noncd.db.de/wagenreihung/1.0>.
+It returns station-specific carriage formations (also kwnown as coach
+sequences) for a variety of trains in the rail network associated with Deutsche
+Bahn.  Data includes carriage positions on the platform, train type (e.g. ICE
+series), carriage-specific attributes such as first/second class, and the
+internal type and number of each carriage.
 
 Positions on the platform are given both in meters and percent (relative to
 platform length).

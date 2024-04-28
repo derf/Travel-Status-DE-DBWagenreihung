@@ -195,11 +195,11 @@ This is beta software: API and output format may change without notice.
 
 =head1 DESCRIPTION
 
-db-wagenreihung shows the carriage formation of train I<train-number> at
-station I<station> (must be a name or DS100 code) as reported by the Deutsche
-Bahn Wagenreihung API. As of April 2024, it has mature support for
-long-distance (IC/EC/ICE) trains and a growing number of regional transport
-providers that also offer mostly correct carriage formation data.
+db-wagenreihung shows the carriage formation (also known as coach sequence) of
+train I<train-number> at station I<station> (must be a name or DS100 code) as
+reported by the Deutsche Bahn Wagenreihung API. As of April 2024, it has mature
+support for long-distance (IC/EC/ICE) trains and a growing number of regional
+transport providers that also offer mostly correct carriage formation data.
 
 It is not possible to request the carriage formation at a train's terminus
 station.  This is a known limitation.
