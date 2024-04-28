@@ -825,12 +825,22 @@ Train number. Do not include the train type: Use "8" for "EC 8" or
 
 =back
 
-=item $wr->destinations
+=item $wr->errstr
 
-Returns a list describing the unique destinations of this train's carriage
-groups.  Each origin is a hashref that contains its B<name>, a B<groups>
-arrayref to the corresponding Travel::Status::DE::DBWagenreihung::Group(3pm)
-objects, and a B<sections> arrayref to section identifiers (subject to change).
+In case of a fatal HTTP or backend error, returns a string describing it.
+Returns undef otherwise.
+
+=item $wr->groups
+
+Returns a list of Travel::Status::DE::DBWagenreihung::Group(3pm) objects
+which describe the groups making up the carriage formation. Typically, each
+group has a distinct origin, destination, or train number. Each group contains
+a set of carriages.
+
+=item $wr->carriages
+
+Describes the individual carriages the train consists of. Returns a list of
+L<Travel::Status::DE::DBWagenreihung::Wagon> objects.
 
 =item $wr->direction
 
@@ -838,17 +848,19 @@ Gives the train's direction of travel. Returns 0 if the train will depart
 towards position 0 and 100 if the train will depart towards the other platform
 end (mnemonic: towards the 100% position).
 
-=item $wr->errstr
-
-In case of a fatal HTTP or backend error, returns a string describing it.
-Returns undef otherwise.
-
 =item $wr->origins
 
 Returns a list describing the unique origins of this train's carriage groups.
 Each origin is a hashref that contains its B<name>, a B<groups> arrayref to the
 corresponding Travel::Status::DE::DBWagenreihung::Group(3pm) objects, and
 a B<sections> arrayref to section identifiers (subject to change).
+
+=item $wr->destinations
+
+Returns a list describing the unique destinations of this train's carriage
+groups.  Each origin is a hashref that contains its B<name>, a B<groups>
+arrayref to the corresponding Travel::Status::DE::DBWagenreihung::Group(3pm)
+objects, and a B<sections> arrayref to section identifiers (subject to change).
 
 =item $wr->platform
 
@@ -882,11 +894,6 @@ arrayref to section identifiers (subject to change).
 =item $wr->train_type
 
 Returns a string describing the train type, e.g. "ICE" or "IC".
-
-=item $wr->carriages
-
-Describes the individual carriages the train consists of. Returns a list of
-L<Travel::Status::DE::DBWagenreihung::Carriage> objects.
 
 =back
 
