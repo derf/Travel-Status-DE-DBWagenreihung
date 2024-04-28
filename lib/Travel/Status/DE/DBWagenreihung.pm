@@ -709,7 +709,13 @@ sub wagongroup_subtype {
 
 	# Less than two wagons are generally inconclusive.
 	# Exception: BR 631 (Link I) only has a single wagon
-	if ( $ml{ $likelihood[0] } < 2 and $likelihood[0] ne '631' ) {
+	if (
+		$ml{ $likelihood[0] } < 2
+		and not($likelihood[0] eq '631'
+			and @wagons == 1
+			and substr( $wagons[0]->uic_id, 0, 2 ) eq '95' )
+	  )
+	{
 		return undef;
 	}
 
