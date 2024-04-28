@@ -181,7 +181,7 @@ sub get_wagonorder {
 	if (    @{ $json->{data}{istformation}{allFahrzeuggruppe} // [] } == 0
 		and @{ $json->{data}{istformation}{halt} // [] } == 0 )
 	{
-		$self->{errstr} = 'No wagon order available';
+		$self->{errstr} = 'No carriage formation available';
 		return;
 	}
 
@@ -277,29 +277,35 @@ sub parse_wagonorder {
 	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
 
 	$self->parse_wagons;
-	$self->{origins}      = $self->parse_wings('startbetriebsstellename');
-	$self->{destinations} = $self->parse_wings('zielbetriebsstellename');
+	$self->{origins}      = $self->merge_group_attr('origin');
+	$self->{destinations} = $self->merge_group_attr('destination');
+	$self->{train_nos}    = $self->merge_group_attr('train_no');
 }
 
-sub parse_wings {
+sub merge_group_attr {
 	my ( $self, $attr ) = @_;
 
-	my @names;
-	my %section;
+	my @attrs;
+	my %attr_to_group;
+	my %attr_to_sections;
 
-	for my $group ( @{ $self->{data}{istformation}{allFahrzeuggruppe} } ) {
-		my $name     = $group->{$attr};
-		my @sections = map { $_->{fahrzeugsektor} } @{ $group->{allFahrzeug} };
-		push( @{ $section{$name} }, @sections );
-		push( @names,               $name );
+	for my $group ( $self->groups ) {
+		push( @attrs,                                    $group->{$attr} );
+		push( @{ $attr_to_group{ $group->{$attr} } },    $group );
+		push( @{ $attr_to_sections{ $group->{$attr} } }, $group->sections );
 	}
 
-	@names = uniq @names;
+	@attrs = uniq @attrs;
 
-	@names
-	  = map { { name => $_, sections => [ uniq @{ $section{$_} } ] } } @names;
-
-	return \@names;
+	return [
+		map {
+			{
+				name     => $_,
+				groups   => $attr_to_group{$_},
+				sections => $attr_to_sections{$_}
+			}
+		} @attrs
+	];
 }
 
 sub parse_wagons {
@@ -328,7 +334,8 @@ sub parse_wagons {
 		);
 		push( @wagon_groups, $group_obj );
 
-		my ( $short, $desc ) = $self->wagongroup_description( $group_obj->wagons );
+		my ( $short, $desc )
+		  = $self->wagongroup_description( $group_obj->wagons );
 		my @sections = uniq map { $_->section } $group_obj->wagons;
 
 		if ( @sections and length( join( q{}, @sections ) ) ) {
@@ -384,6 +391,12 @@ sub origins {
 	my ($self) = @_;
 
 	return @{ $self->{origins} // [] };
+}
+
+sub train_nos {
+	my ($self) = @_;
+
+	return @{ $self->{train_nos} // [] };
 }
 
 sub sections {
@@ -813,15 +826,10 @@ Train number. Do not include the train type: Use "8" for "EC 8" or
 
 =item $wr->destinations
 
-Returns a list describing the destinations of this train's carriages. In most
-cases, it contains one element. For trains consisting of multiple wings or
-trains that switch locomotives along the way, it contains one element for each
-wing or other kind of carriage group.
-
-Each destination is a hash ref containing its B<name> and the corresponding
-platform I<sections> (at the moment, this is a list of section identifiers).
-
-This function is subject to change.
+Returns a list describing the unique destinations of this train's carriage
+groups.  Each origin is a hashref that contains its B<name>, a B<groups>
+arrayref to the corresponding Travel::Status::DE::DBWagenreihung::Group(3pm)
+objects, and a B<sections> arrayref to section identifiers (subject to change).
 
 =item $wr->direction
 
@@ -836,15 +844,10 @@ Returns undef otherwise.
 
 =item $wr->origins
 
-Returns a list describing the origins of this train's carriages. In most
-cases, it contains one element. For trains consisting of multiple wings or
-trains that switch locomotives along the way, it contains one element for each
-wing or other kind of carriage group.
-
-Each origin is a hash ref containing its B<name> and the corresponding
-platform I<sections> (at the moment, this is a list of section identifiers).
-
-This function is subject to change.
+Returns a list describing the unique origins of this train's carriage groups.
+Each origin is a hashref that contains its B<name>, a B<groups> arrayref to the
+corresponding Travel::Status::DE::DBWagenreihung::Group(3pm) objects, and
+a B<sections> arrayref to section identifiers (subject to change).
 
 =item $wr->platform
 
@@ -866,6 +869,14 @@ not necessarily identical with UIC station ID), and B<name> (station name).
 Returns the list of train numbers for this departure. In most cases, this is
 just one element. For trains consisting of multiple wings (which typically have
 different numbers), it contains one element for each wing.
+
+=item $wr->train_nos
+
+Returns a list describing the unique train numbers associated with this train's
+carriage groups.  Each train number is a hashref that contains its B<name>
+(i.e., number), a B<groups> arrayref to the corresponding
+Travel::Status::DE::DBWagenreihung::Group(3pm) objects, and a B<sections>
+arrayref to section identifiers (subject to change).
 
 =item $wr->train_type
 
