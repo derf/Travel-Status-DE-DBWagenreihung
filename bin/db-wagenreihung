@@ -179,7 +179,7 @@ __END__
 
 =head1 NAME
 
-db-wagenreihung - Interface to Deutsche Bahn Wagon Order API
+db-wagenreihung - Interface to Deutsche Bahn carriage formation API
 
 =head1 SYNOPSIS
 
@@ -193,15 +193,14 @@ This is beta software: API and output format may change without notice.
 
 =head1 DESCRIPTION
 
-db-wagenreihung shows the wagon order of train I<train-number> at station
-I<station> (must be a name or DS100 code) as reported by the Deutsche Bahn
-Wagon Order API. As of April 2020, long-distance IC/EC/ICFE trains are widely
-supported, and some regions (e.g. Stuttgart/Karlsruhe) also provide wagon
-orders for select regional trains. Data accuracy varies, but seems to be
-improving over time.
+db-wagenreihung shows the carriage formation of train I<train-number> at
+station I<station> (must be a name or DS100 code) as reported by the Deutsche
+Bahn Wagenreihung API. As of April 2024, it has mature support for
+long-distance (IC/EC/ICE) trains and a growing number of regional transport
+providers that also offer mostly correct carriage formation data.
 
-It is not possible to request the wagon order at a train's terminus station.
-This is a known limitation.
+It is not possible to request the carriage formation at a train's terminus
+station.  This is a known limitation.
 
 The departure of I<train-number> must be in the time range between now and
 two hours in the future.
@@ -212,11 +211,11 @@ two hours in the future.
 
 =item db-wagenreihung 'Essen Hbf' 723
 
-Show wagon order of ICE 723 at Essen Hbf
+Show carriage formation of ICE 723 at Essen Hbf
 
 =item db-wagenreihung TS 3259
 
-Show wagon order of IRE 3259 at Stuttgart Hbf
+Show carriage formation of IRE 3259 at Stuttgart Hbf
 
 =back
 
@@ -234,7 +233,7 @@ Show wagon order of IRE 3259 at Stuttgart Hbf
 
 =head1 AUTHOR
 
-Copyright (C) 2018-2020 by Birte Kristina Friesel E<lt>derf@finalrewind.orgE<gt>
+Copyright (C) 2018-2024 by Birte Kristina Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 
