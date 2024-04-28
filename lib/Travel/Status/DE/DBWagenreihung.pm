@@ -716,6 +716,11 @@ sub groups {
 	return @{ $self->{wagongroups} // [] };
 }
 
+sub carriages {
+	my ($self) = @_;
+	return @{ $self->{wagons} // [] };
+}
+
 sub wagons {
 	my ($self) = @_;
 	return @{ $self->{wagons} // [] };
@@ -743,7 +748,7 @@ __END__
 
 =head1 NAME
 
-Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
+Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn carriage formation API.
 
 =head1 SYNOPSIS
 
@@ -754,8 +759,8 @@ Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API.
         train_number => 1234,
     );
 
-    for my $wagon ( $wr->wagons ) {
-        printf("Wagen %s: Abschnitt %s\n", $wagon->number // '?', $wagon->section);
+    for my $carriage ( $wr->carriages ) {
+        printf("Wagen %s: Abschnitt %s\n", $carriage->number // '?', $carriage->section);
     }
 
 =head1 VERSION
@@ -767,19 +772,17 @@ This is beta software. The API may change without notice.
 =head1 DESCRIPTION
 
 Travel:Status:DE::DBWagenreihung is an unofficial interface to the Deutsche
-Bahn Wagon Order API at L<https://www.apps-bahn.de/wr/wagenreihung/1.0>.  It
-returns station-specific wagon orders for long-distance trains operated by
-Deutsche Bahn. Data includes wagon positions on the platform, the ICE series,
-wagon-specific attributes such as first/second class or family coaches, and the
-internal type and number of each wagon.
+Bahn carriage formation API at L<https://ist-wr.noncd.db.de/wagenreihung/1.0>.
+It returns station-specific carriage formations for a variety of trains in the
+rail network associated with Deutsche Bahn.  Data includes carriage positions
+on the platform, train type (e.g. ICE series), carriage-specific attributes
+such as first/second class, and the internal type and number of each carriage.
 
-Positions on the platform are given both in meters and per cent (relative to
+Positions on the platform are given both in meters and percent (relative to
 platform length).
 
-At the time of this writing, only ICE trains are officially supported by the
-backend, and even then glitches may occur. IC/EC trains are not officially
-supported; reported wagon orders may be correct, may lack unscheduled changes,
-or may be completely bogus.
+Note that carriage formation data reported by the API is known to be bogus
+from time to time. This module does not perform thorough sanity checking.
 
 =head1 METHODS
 
@@ -787,10 +790,10 @@ or may be completely bogus.
 
 =item my $wr = Travel::Status::DE::DBWagenreihung->new(I<%opts>)
 
-Requests wagon order for a specific train at a specific scheduled departure
-time and date, which implicitly encodes the requested station. Use
-L<Travel::Status::DE::IRIS> or similar to map station name and train number
-to scheduled departure.
+Requests carriage formation for a specific train at a specific scheduled
+departure time and date, which implicitly encodes the requested station. Use
+L<Travel::Status::DE::IRIS> or similar to map station name and train number to
+scheduled departure.
 
 Arguments:
 
@@ -798,8 +801,8 @@ Arguments:
 
 =item B<departure> => I<datetime-obj> | I<YYYYMMDDhhmm>
 
-Scheduled departure at the station of interested. Must be either a
-L<DateTime> object or a string in YYYYMMDDhhmm format. Mandatory.
+Scheduled departure at the station of interest. Must be either a
+L<DateTime> object or a string in I<YYYYMMDDhhmm> format. Mandatory.
 
 =item B<train_number> => I<number>
 
@@ -810,10 +813,10 @@ Train number. Do not include the train type: Use "8" for "EC 8" or
 
 =item $wr->destinations
 
-Returns a list describing the destinations of this train's wagons. In most
+Returns a list describing the destinations of this train's carriages. In most
 cases, it contains one element. For trains consisting of multiple wings or
 trains that switch locomotives along the way, it contains one element for each
-wing or other kind of wagon group.
+wing or other kind of carriage group.
 
 Each destination is a hash ref containing its B<name> and the corresponding
 platform I<sections> (at the moment, this is a list of section identifiers).
@@ -833,10 +836,10 @@ Returns undef otherwise.
 
 =item $wr->origins
 
-Returns a list describing the origins of this train's wagons. In most
+Returns a list describing the origins of this train's carriages. In most
 cases, it contains one element. For trains consisting of multiple wings or
 trains that switch locomotives along the way, it contains one element for each
-wing or other kind of wagon group.
+wing or other kind of carriage group.
 
 Each origin is a hash ref containing its B<name> and the corresponding
 platform I<sections> (at the moment, this is a list of section identifiers).
@@ -858,18 +861,6 @@ Returns a hashref describing the requested station. The hashref contains three
 entries: B<ds100> (DS100 / Ril100 identifier), B<eva> (EVA ID, related to but
 not necessarily identical with UIC station ID), and B<name> (station name).
 
-=item $wr->wagongroup_description
-
-Returns two strings describing the rolling stock used for this train based on
-model and locomotive (if present). The first one tries to be conscise (e.g.
-"ICE 4"). The second is more detailed, e.g. "ICE 4 Hochgeschwindigkeitszug",
-"IC 2 Twindexx mit elektrischer Lokomotive", or "Diesel-Triebzug".
-
-=item $wr->wagongroup_model
-
-Returns a string describing the rolling stock used for this train, e.g. "ICE 4"
-or "IC2 KISS".
-
 =item $wr->train_numbers
 
 Returns the list of train numbers for this departure. In most cases, this is
@@ -880,15 +871,10 @@ different numbers), it contains one element for each wing.
 
 Returns a string describing the train type, e.g. "ICE" or "IC".
 
-=item $wr->wagongroup_subtype
+=item $wr->carriages
 
-Returns a string describing the rolling stock model used for this train, e.g.
-"412" (model 412 aka ICE 4) or "411.S2" (model 411 aka ICE T, series 2).
-
-=item $wr->wagons
-
-Describes the individual wagons the train consists of. Returns a list of
-L<Travel::Status::DE::DBWagenreihung::Wagon> objects.
+Describes the individual carriages the train consists of. Returns a list of
+L<Travel::Status::DE::DBWagenreihung::Carriage> objects.
 
 =back
 
