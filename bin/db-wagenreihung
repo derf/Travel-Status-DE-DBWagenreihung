@@ -166,9 +166,12 @@ for my $group ( $wr->groups ) {
 	for my $wagon ( $group->wagons ) {
 		printf(
 			"%3s: %3s %10s  %s\n",
-			$wagon->is_closed ? 'X' : ( $wagon->number || '?' ),
+			$wagon->is_closed       ? 'X'
+			: $wagon->is_locomotive ? 'Lok'
+			: $wagon->number || '?',
 			$wagon->model || '???',
-			$wagon->type, join( q{  }, $wagon->attributes )
+			$wagon->type,
+			join( q{  }, $wagon->attributes )
 		);
 	}
 	say "";
