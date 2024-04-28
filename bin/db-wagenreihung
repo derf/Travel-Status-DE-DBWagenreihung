@@ -99,9 +99,8 @@ for my $section ( $wr->sections ) {
 	}
 
 	printf( "▏%s%s%s▕",
-		' ' x $spacing_left,
-		$section->name,
-		' ' x $spacing_right );
+		( $spacing_left >= 0 )                  ? ' ' x $spacing_left  : q{},
+		$section->name, ( $spacing_right >= 0 ) ? ' ' x $spacing_right : q{} );
 }
 print "\n";
 
