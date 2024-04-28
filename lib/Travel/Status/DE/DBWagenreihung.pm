@@ -261,6 +261,29 @@ sub wagongroup_powertype {
 	return $likelihood[0];
 }
 
+sub parse_train_descriptions {
+	my ($self) = @_;
+
+	for my $group ( @{ $self->{wagongroups} } ) {
+		my ( $short, $desc ) = $self->wagongroup_description( $group->wagons );
+		my @sections = uniq map { $_->section } $group->wagons;
+
+		if ( @sections and length( join( q{}, @sections ) ) ) {
+			$group->set_sections(@sections);
+		}
+		$group->set_description( $desc, $short );
+
+		push(
+			@{ $self->{train_descriptions} },
+			{
+				sections => [@sections],
+				short    => $short,
+				text     => $desc,
+			}
+		);
+	}
+}
+
 sub parse_wagonorder {
 	my ($self) = @_;
 
@@ -276,6 +299,7 @@ sub parse_wagonorder {
 	$self->{train_no}   = $self->{data}{istformation}{zugnummer};
 
 	$self->parse_wagons;
+	$self->parse_train_descriptions;
 	$self->{origins}      = $self->parse_wings('startbetriebsstellename');
 	$self->{destinations} = $self->parse_wings('zielbetriebsstellename');
 }
@@ -406,26 +430,7 @@ sub sections {
 
 sub train_descriptions {
 	my ($self) = @_;
-
-	if ( exists $self->{train_descriptions} ) {
-		return @{ $self->{train_descriptions} };
-	}
-
-	for my $group ( @{ $self->{wagongroups} } ) {
-		my ( $short, $desc ) = $self->wagongroup_description( $group->wagons );
-		my @sections = uniq map { $_->section } $group->wagons;
-
-		push(
-			@{ $self->{train_descriptions} },
-			{
-				sections => [@sections],
-				short    => $short,
-				text     => $desc,
-			}
-		);
-	}
-
-	return @{ $self->{train_descriptions} };
+	return @{ $self->{train_descriptions} // [] };
 }
 
 sub train_numbers {

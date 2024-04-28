@@ -10,13 +10,29 @@ use parent 'Class::Accessor';
 our $VERSION = '0.13';
 
 Travel::Status::DE::DBWagenreihung::Group->mk_ro_accessors(
-	qw(id train_no type origin destination));
+	qw(id train_no type description desc_short origin destination has_sections)
+);
 
 sub new {
 	my ( $obj, %opt ) = @_;
 	my $ref = \%opt;
 
 	return bless( $ref, $obj );
+}
+
+sub set_description {
+	my ( $self, $desc, $short ) = @_;
+
+	$self->{description} = $desc;
+	$self->{desc_short}  = $short;
+}
+
+sub set_sections {
+	my ( $self, @sections ) = @_;
+
+	$self->{sections} = [@sections];
+
+	$self->{has_sections} = 1;
 }
 
 sub set_traintype {
@@ -33,6 +49,12 @@ sub sort_wagons {
 	@{ $self->{wagons} }
 	  = sort { $a->{position}{start_percent} <=> $b->{position}{start_percent} }
 	  @{ $self->{wagons} };
+}
+
+sub sections {
+	my ($self) = @_;
+
+	return @{ $self->{sections} // [] };
 }
 
 sub wagons {

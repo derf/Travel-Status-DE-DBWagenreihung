@@ -149,22 +149,30 @@ for my $wagon ( $wr->wagons ) {
 print $wr->direction == 100 ? '>' : '<';
 print "\n\n";
 
-for my $desc ( $wr->train_descriptions ) {
-	if ( $desc->{text} ) {
+for my $group ( $wr->groups ) {
+	if ( $group->has_sections ) {
 		printf( "%s (%s)\n",
-			$desc->{text}, join( q{}, @{ $desc->{sections} } ) );
+			$group->description || 'Zug',
+			join( q{}, $group->sections ) );
 	}
-}
-
-say "";
-
-for my $wagon ( $wr->wagons ) {
+	else {
+		say $group->description || 'Zug';
+	}
 	printf(
-		"%3s: %3s %10s  %s\n",
-		$wagon->is_closed ? 'X' : ( $wagon->number || '?' ),
-		$wagon->model || '???',
-		$wagon->type, join( q{  }, $wagon->attributes )
+		"%s %s  %s → %s\n\n",
+		$wr->train_type, $group->train_no,
+		$group->origin,  $group->destination
 	);
+
+	for my $wagon ( $group->wagons ) {
+		printf(
+			"%3s: %3s %10s  %s\n",
+			$wagon->is_closed ? 'X' : ( $wagon->number || '?' ),
+			$wagon->model || '???',
+			$wagon->type, join( q{  }, $wagon->attributes )
+		);
+	}
+	say "";
 }
 
 __END__
