@@ -360,6 +360,10 @@ sub parse_wagons {
 		for my $group (@wagon_groups) {
 			$group->sort_wagons;
 		}
+		@wagon_groups = sort {
+			$a->{wagons}[0]{position}{start_percent}
+			  <=> $b->{wagons}[0]{position}{start_percent}
+		} @wagon_groups;
 	}
 
 	for my $i ( 0 .. $#wagon_groups ) {
