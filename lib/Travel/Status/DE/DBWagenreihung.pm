@@ -375,7 +375,7 @@ Mandatory.
 
 EVA ID of the station of interest.
 
-=time B<train_type> => I<string>
+=item B<train_type> => I<string>
 
 Train type, e.g. "S" or "ICE".
 
