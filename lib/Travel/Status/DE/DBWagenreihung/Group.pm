@@ -11,7 +11,7 @@ use List::Util qw(uniq);
 our $VERSION = '0.14';
 
 Travel::Status::DE::DBWagenreihung::Group->mk_ro_accessors(
-	qw(train_no train_type description desc_short destination has_sectors model series)
+	qw(train_no train_type description desc_short destination has_sectors model series start_percent end_percent)
 );
 
 # {{{ Rolling Stock Models
@@ -96,6 +96,9 @@ sub new {
 	if ( @{ $ref->{sectors} } ) {
 		$ref->{has_sectors} = 1;
 	}
+
+	$ref->{start_percent} = $ref->{carriages}[0]->start_percent;
+	$ref->{end_percent}   = $ref->{carriages}[-1]->end_percent;
 
 	bless( $ref, $obj );
 

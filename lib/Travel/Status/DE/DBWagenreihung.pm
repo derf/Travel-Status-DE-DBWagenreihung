@@ -69,15 +69,25 @@ sub get_wagonorder {
 	my $train_type   = $self->{train_type};
 	my $train_number = $self->{train_number};
 
-	my $datetime = $self->{departure}->clone->set_time_zone('UTC');
-
 	my $json = $self->{from_json};
 
 	if ( not $json ) {
-		my $date = $datetime->strftime('%Y-%m-%d');
-		my $time = $datetime->rfc3339 =~ s{(?=Z)}{.000}r;
-		my ( $content, $err ) = $self->get_with_cache( $cache,
-"${api_base}?administrationId=80&category=${train_type}&date=${date}&evaNumber=${eva}&number=${train_number}&time=${time}"
+		my $datetime = $self->{departure}->clone->set_time_zone('UTC');
+		my $date     = $datetime->strftime('%Y-%m-%d');
+		my $time     = $datetime->rfc3339 =~ s{(?=Z)}{.000}r;
+		$self->{param} = {
+			administrationId => 80,
+			category         => $train_type,
+			date             => $date,
+			evaNumber        => $eva,
+			number           => $train_number,
+			time             => $time
+		};
+		my ( $content, $err ) = $self->get_with_cache(
+			$cache,
+			$api_base . '?'
+			  . join( '&',
+				map { $_ . '=' . $self->{param}{$_} } keys %{ $self->{param} } )
 		);
 
 		if ($err) {
@@ -212,6 +222,8 @@ sub parse_carriages {
 			push( @group_carriages,        $carriage_object );
 			push( @{ $self->{carriages} }, $carriage_object );
 		}
+		@group_carriages
+		  = sort { $a->start_percent <=> $b->start_percent } @group_carriages;
 		my $group_obj = Travel::Status::DE::DBWagenreihung::Group->new(
 			json      => $group,
 			carriages => \@group_carriages,
@@ -219,6 +231,8 @@ sub parse_carriages {
 		push( @groups,  $group_obj );
 		push( @numbers, $group_obj->train_no );
 	}
+
+	@groups = sort { $a->start_percent <=> $b->start_percent } @groups;
 
 	@numbers = uniq @numbers;
 	$self->{train_numbers} = \@numbers;
