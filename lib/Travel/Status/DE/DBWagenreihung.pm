@@ -158,6 +158,7 @@ sub parse_wagonorder {
 	$self->parse_carriages;
 	$self->{destinations}  = $self->merge_group_attr('destination');
 	$self->{train_numbers} = $self->merge_group_attr('train_no');
+	$self->{trains}        = $self->merge_group_attr('train');
 }
 
 sub merge_group_attr {
@@ -270,6 +271,12 @@ sub train_numbers {
 	my ($self) = @_;
 
 	return @{ $self->{train_numbers} // [] };
+}
+
+sub trains {
+	my ($self) = @_;
+
+	return @{ $self->{trains} // [] };
 }
 
 sub sectors {

@@ -89,6 +89,8 @@ sub new {
 		train_no    => $json{transport}{number},
 	};
 
+	$ref->{train} = $ref->{train_type} . ' ' . $ref->{train_no};
+
 	$ref->{sectors} = [
 		uniq grep { defined }
 		  map     { $_->{platformPosition}{sector} } @{ $json{vehicles} // [] }
