@@ -160,7 +160,7 @@ for my $group ( $wr->groups ) {
 		say $group->description || 'Zug';
 	}
 	printf( "%s %s  → %s\n\n",
-		$wr->train_type, $group->train_no, $group->destination );
+		$group->train_type, $group->train_no, $group->destination );
 
 	for my $wagon ( $group->carriages ) {
 		printf(
