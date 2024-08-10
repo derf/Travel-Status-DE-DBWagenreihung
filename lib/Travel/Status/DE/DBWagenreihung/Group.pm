@@ -84,7 +84,7 @@ sub new {
 		carriages   => $opt{carriages},
 		destination => $json{transport}{destination}{name},
 		train_type  => $json{transport}{category},
-		name        => $json{transport}{name},
+		name        => $json{name},
 		line        => $json{transport}{numberwline},
 		train_no    => $json{transport}{number},
 	};
