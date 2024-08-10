@@ -151,14 +151,10 @@ print $wr->direction == 100 ? '>' : '<';
 print "\n\n";
 
 for my $group ( $wr->groups ) {
-	if ( $group->has_sectors ) {
-		printf( "%s (%s)\n",
-			$group->description || 'Zug',
-			join( q{}, $group->sectors ) );
-	}
-	else {
-		say $group->description || 'Zug';
-	}
+	printf( "%s%s%s\n",
+		$group->description || 'Zug',
+		$group->designation ? ' „' . $group->designation . '“'          : q{},
+		$group->has_sectors ? ' (' . join( q{}, $group->sectors ) . ')' : q{} );
 	printf( "%s %s  → %s\n\n",
 		$group->train_type, $group->train_no, $group->destination );
 
