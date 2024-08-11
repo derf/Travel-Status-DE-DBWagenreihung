@@ -654,6 +654,12 @@ sub parse_description {
 	$self->{description} = $ret;
 }
 
+sub name_to_designation {
+	my ($self) = @_;
+
+	return %ice_name;
+}
+
 sub sectors {
 	my ($self) = @_;
 
