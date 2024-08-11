@@ -354,7 +354,7 @@ sub new {
 		train_no    => $json{transport}{number},
 	};
 
-	if ( $ref->{name} =~ m{ ^ ICE 0* (\d+) $ }x and exists $ice_name{$1} ) {
+	if ( $ref->{name} =~ m{ ^ IC[DE] 0* (\d+) $ }x and exists $ice_name{$1} ) {
 		$ref->{designation} = $ice_name{$1};
 	}
 
