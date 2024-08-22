@@ -320,6 +320,7 @@ my %model_name = (
 	'640'      => [ 'LINT 27',             'BR 640' ],
 	'642'      => [ 'Desiro Classic',      'BR 642' ],
 	'643'      => [ 'TALENT',              'BR 643' ],
+	'644'      => [ 'TALENT',              'BR 644' ],
 	'648'      => [ 'LINT 41',             'BR 648' ],
 	'IC2.TWIN' => ['IC 2 Twindexx'],
 	'IC2.KISS' => ['IC 2 KISS'],
@@ -447,6 +448,7 @@ sub parse_model {
 		'640'      => 0,
 		'642'      => 0,
 		'643'      => 0,
+		'644'      => 0,
 		'648'      => 0,
 		'IC2.TWIN' => 0,
 		'IC2.KISS' => 0,
@@ -583,6 +585,9 @@ sub parse_model {
 		}
 		elsif ( $carriage->model == 643 or $carriage->model == 943 ) {
 			$ml{'643'}++;
+		}
+		elsif ( $carriage->model == 644 or $carriage->model == 944 ) {
+			$ml{'644'}++;
 		}
 		elsif ( $carriage->model == 648 ) {
 			$ml{'648'}++;
