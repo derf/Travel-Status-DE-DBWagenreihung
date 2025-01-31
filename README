@@ -1,6 +1,9 @@
 Travel::Status::DE::DBWagenreihung - Interface to Deutsche Bahn Wagon Order API
 -------------------------------------------------------------------------------
 
+This project is **deprecated**.
+Please use [Travel::Status::DE::DBRIS](https://finalrewind.org/projects/Travel-Status-DE-DBRIS/) instead.
+
 <https://finalrewind.org/projects/Travel-Status-DE-DBWagenreihung/>
 
 This software is not stable yet; API, script and module names/usage may change
